@@ -48,3 +48,13 @@ def get_solving_times_dir():
 def get_solving_times_path(name):
     dir = get_solving_times_dir()
     return f"{dir}/{name}.json"
+
+def get_pysr_results_dir():
+    dir = f"./results/pysr_results/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_pysr_results_path(name):
+    dir = get_pysr_results_dir()
+    return f"{dir}/{name}.jl"
