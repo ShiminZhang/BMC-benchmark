@@ -58,3 +58,41 @@ def get_pysr_results_dir():
 def get_pysr_results_path(name):
     dir = get_pysr_results_dir()
     return f"{dir}/{name}.jl"
+
+def get_pysr_summary_path(name):
+    dir = get_pysr_results_dir()
+    return f"{dir}/{name}.summary.json"
+
+def get_analysis_results_dir():
+    dir = f"./results/llm_analysis_results/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_analysis_raw_output_path(name):
+    dir = get_analysis_results_dir()
+    return f"{dir}/{name}.raw_output.json"
+
+def get_analysis_results_path(name):
+    dir = get_analysis_results_dir()
+    return f"{dir}/{name}.json"
+
+def get_pysr_cache_dir():
+    dir = f"./results/pysr_results/cache/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_pysr_cache_path(name):
+    dir = get_pysr_cache_dir()
+    return f"{dir}/{name}_model.pkl"
+
+def get_plots_dir():
+    dir = f"./results/plots/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_plot_path(name):
+    dir = get_plots_dir()
+    return f"{dir}/{name}.png"
