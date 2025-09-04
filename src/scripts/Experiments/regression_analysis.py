@@ -11,6 +11,10 @@ import numpy as np
 import argparse
 from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results
 
+import juliacall
+juliacall.using("SymbolicRegression")
+juliacall.init()
+
 def load_data(name):
     # load data from the solving_times directory
     solving_times_dir = get_solving_times_dir()
@@ -151,8 +155,10 @@ def get_pysr_config(config_type="balanced"):
         return {
             **base_config,
             "niterations": 250,  # More iterations for better exploration
-            "binary_operators": ["+", "-", "*", "/"],  # All basic operations
-            "unary_operators": ["exp", "log", "sqrt"],  # Include exponential functions
+            "binary_operators": ["+", "-", "*", "^"],  # All basic operations
+            "unary_operators": ["exp"],  # Include exponential functions
+            "constraints": {"maxdepth": 5},
+            "warm_start": False,
             # "maxsize": 20,  # Allow enough complexity for exponential terms if needed
             # "maxdepth": 10,
             # "parsimony": 0.06,  # Lower parsimony to allow exponential terms if beneficial
