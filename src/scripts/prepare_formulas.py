@@ -1,11 +1,11 @@
 import os
 import multiprocessing
 import subprocess
-from GenericRA import LOG, LOG_TAG, TOGGLE_SHOWLOG, REG_TAG
-from paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path
-from utils.utils import run_slurm_job_wrap
+from .GenericRA import LOG, LOG_TAG, TOGGLE_SHOWLOG, REG_TAG
+from .paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path
+from .utils.utils import run_slurm_job_wrap
 import argparse
-from category import get_instance_list
+from .category import get_all_instance_names
 
 def run_formula(name, K, solver, limit):
     cnf_path = get_cnf_path(name, K)
@@ -84,12 +84,12 @@ def main():
     args = parser.parse_args()
 
     if args.manage:
-        interested_names = get_instance_list("all")
+        interested_names = get_all_instance_names()
         log_dir = "./logs/prepare_formulas/"
         os.makedirs(log_dir, exist_ok=True)
         for name in interested_names:
             run_slurm_job_wrap(
-                f"python src/scripts/prepare_formulas.py --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit}",
+                f"python -m src.scripts.prepare_formulas --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit}",
                 f"{log_dir}/{name}_{args.k_limit}.log",
                 f"pf_{name}_{args.k_limit}", mem="16g", time="20:00:00"
                 )

@@ -7,7 +7,7 @@ def run_slurm_job_wrap(cmd, output, job_name,wait_id=None,mem="16g", time="20:00
         print(f"Running command: {cmd}")
         os.system(cmd)
         return
-    activate_python = "source ../../general/bin/activate"
+    activate_python = "source ../general/bin/activate"
     wrap = f"{activate_python} && {cmd}"
     # os.system(f"sbatch --job-name={job_name} --output={output} --mem={mem} --time={time} --wrap=\"{wrap}\"")
     if wait_id is None: 

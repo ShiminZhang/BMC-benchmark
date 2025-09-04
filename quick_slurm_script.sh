@@ -4,6 +4,6 @@
 #SBATCH --mem=16G
 #SBATCH --output=./dumb_scheduler_%j.log
 
-source ../../general/bin/activate
+source ../general/bin/activate
 # python scripts/prepare.py --prepare_sequential --pddef 1 --manage 
-python src/scripts/prepare_formulas.py --manage --time_limit 1800 --k_limit 5000
+python -m src.scripts.prepare_formulas --manage --time_limit 1800 --k_limit 5000
