@@ -119,7 +119,130 @@ def save_best_equation(model, name):
         print(f"Error saving equation for {name}: {e}")
         return None
 
-def run_pysr(name, use_cache=False, save_equation=True):
+def get_pysr_config(config_type="balanced"):
+    """
+    Get PySR configuration based on the specified type.
+    
+    Args:
+        config_type (str): Configuration type
+            - "auto": Let PySR automatically discover the best mathematical form (recommended)
+            - "balanced": Good balance between accuracy and simplicity, lets PySR discover the best form
+            - "exponential": Optimized for exponential/logarithmic functions
+            - "simple": Very simple equations, minimal overfitting
+            - "accurate": High accuracy, may be more complex
+            - "custom": Custom configuration for experimentation
+    
+    Returns:
+        dict: Configuration parameters for PySR
+    """
+    
+    base_config = {
+        # "niterations": 200,
+        # "population_size": 25,
+        # "ncycles_per_iteration": 50,
+        # "warm_start": True,
+        # "verbosity": 1,
+        # "timeout_in_seconds": 300,
+        # "select_k_features": 1,
+    }
+    
+    if config_type == "auto":
+        # Configuration that lets PySR automatically discover the best form
+        return {
+            **base_config,
+            "niterations": 250,  # More iterations for better exploration
+            "binary_operators": ["+", "-", "*", "/"],  # All basic operations
+            "unary_operators": ["exp", "log", "sqrt"],  # Include exponential functions
+            # "maxsize": 20,  # Allow enough complexity for exponential terms if needed
+            # "maxdepth": 10,
+            # "parsimony": 0.06,  # Lower parsimony to allow exponential terms if beneficial
+            # "alpha": 0.06,  # Lower regularization to allow more complex forms
+            # "elementwise_loss": "loss(x, y) = abs(x - y)",
+            # "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-8 && complexity < 15",
+            # # Intelligent search parameters
+            # "warm_start": True,  # Use previous solutions as starting point
+            # "populations": 4,  # Multiple populations for better exploration
+            # "fraction_replaced": 0.08,  # Conservative replacement to maintain good solutions
+            # "tournament_selection_n": 5,  # Tournament selection for better diversity
+        }
+    
+    elif config_type == "balanced":
+        return {
+            **base_config,
+            "binary_operators": ["+", "-", "*", "/"],
+            "unary_operators": ["exp", "log", "sqrt", "abs"],  # Include exponential functions but don't force them
+            "maxsize": 18,  # Allow enough complexity for exponential terms if needed
+            "maxdepth": 9,
+            "parsimony": 0.08,  # Balanced parsimony - not too high, not too low
+            "alpha": 0.08,  # Balanced regularization
+            "elementwise_loss": "loss(x, y) = abs(x - y)",
+            "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-7 && complexity < 12",
+            # Let PySR naturally discover if exponential terms are needed
+            "warm_start": True,  # Use previous solutions as starting point
+            "npopulations": 3,  # Multiple populations for better exploration
+            "fraction_replaced": 0.1,  # Conservative replacement to maintain good solutions
+        }
+    
+    elif config_type == "exponential":
+        return {
+            **base_config,
+            "niterations": 300,  # More iterations for complex functions
+            "binary_operators": ["+", "-", "*", "/"],
+            "unary_operators": ["exp", "log", "sqrt", "abs", "sin", "cos"],  # Include trig functions
+            "maxsize": 20,  # Allow slightly larger equations for exponential functions
+            "maxdepth": 10,
+            "parsimony": 0.05,  # Lower parsimony to allow more complex exponential forms
+            "alpha": 0.05,  # Lower regularization for exponential functions
+            "elementwise_loss": "loss(x, y) = abs(x - y)",
+            "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-8 && complexity < 15",
+        }
+    
+    elif config_type == "simple":
+        return {
+            **base_config,
+            "niterations": 150,
+            "binary_operators": ["+", "-", "*"],  # No division to avoid complexity
+            "unary_operators": ["abs"],  # Only absolute value
+            "maxsize": 8,  # Very small equations
+            "maxdepth": 4,
+            "parsimony": 0.3,  # High parsimony for simplicity
+            "alpha": 0.2,  # High regularization
+            "elementwise_loss": "loss(x, y) = abs(x - y)",
+            "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-5 && complexity < 5",
+        }
+    
+    elif config_type == "accurate":
+        return {
+            **base_config,
+            "niterations": 400,
+            "binary_operators": ["+", "-", "*", "/"],
+            "unary_operators": ["exp", "log", "sqrt", "abs", "sin", "cos", "tan"],
+            "maxsize": 25,
+            "maxdepth": 12,
+            "parsimony": 0.02,  # Very low parsimony for accuracy
+            "alpha": 0.01,  # Low regularization
+            "elementwise_loss": "loss(x, y) = (x - y)^2",  # MSE loss for accuracy
+            "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-10",
+        }
+    
+    elif config_type == "custom":
+        # Custom configuration for experimentation
+        return {
+            **base_config,
+            "binary_operators": ["+", "-", "*", "/"],
+            "unary_operators": ["exp", "log", "sqrt", "abs"],
+            "maxsize": 18,
+            "maxdepth": 9,
+            "parsimony": 0.08,
+            "alpha": 0.08,
+            "elementwise_loss": "loss(x, y) = abs(x - y)",
+            "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-7 && complexity < 12",
+        }
+    
+    else:
+        raise ValueError(f"Unknown config_type: {config_type}. Use 'auto', 'balanced', 'exponential', 'simple', 'accurate', or 'custom'")
+
+def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     # Load data first to get hash
     data = load_data(name)
     data_hash = get_data_hash(data) if use_cache else None
@@ -133,7 +256,7 @@ def run_pysr(name, use_cache=False, save_equation=True):
                 save_best_equation(cached_model, name)
             return cached_model
     
-    print(f"Training new model for {name}...")
+    print(f"Training new model for {name} with {config_type} configuration...")
     
     # Convert data to proper format for PySR
     # data.items() gives us (key, value) pairs, we need to separate them
@@ -149,12 +272,17 @@ def run_pysr(name, use_cache=False, save_equation=True):
     output_dir = get_pysr_results_dir() 
     os.makedirs(output_dir, exist_ok=True)
     
-    # use pysr to do regression analysis
+    # Get configuration based on type
+    config = get_pysr_config(config_type)
+    
+    # Create PySR model with the selected configuration
     model = pysr.PySRRegressor(
-        niterations=100,
         output_directory=get_pysr_results_path(name),
-        tempdir=os.path.join(output_dir, "temp")
+        tempdir=os.path.join(output_dir, "temp"),
+        **config
     )
+    
+    # Fit the model
     model.fit(x, y)
     
     # Save model to cache
@@ -167,7 +295,7 @@ def run_pysr(name, use_cache=False, save_equation=True):
     
     return model
 
-def batch_save_equations(names=None, use_cache=True):
+def batch_save_equations(names=None, use_cache=True, config_type="auto"):
     """Batch process instances and save their best equations"""
     if names is None:
         names = get_all_instance_names()
@@ -175,11 +303,11 @@ def batch_save_equations(names=None, use_cache=True):
     results = {}
     
     for i, name in enumerate(names):
-        print(f"\n=== Processing {name} ({i+1}/{len(names)}) ===")
+        print(f"\n=== Processing {name} ({i+1}/{len(names)}) with {config_type} config ===")
         
         try:
             # Run PySR with caching and automatic equation saving
-            model = run_pysr(name, use_cache=use_cache, save_equation=True)
+            model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
             best_eq = str(model.sympy())
             results[name] = best_eq
             print(f"✓ Best equation: {best_eq}")
@@ -190,8 +318,8 @@ def batch_save_equations(names=None, use_cache=True):
     
     return results
 
-def run_pysr_and_check_with_llm(name, use_cache=False):
-    model = run_pysr(name, use_cache=use_cache, save_equation=True)
+def run_pysr_and_check_with_llm(name, use_cache=False, config_type="auto"):
+    model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
     print(f"Best equation: {model.sympy()}")
     llm_analysis(name, use_cache=use_cache)
 
@@ -200,16 +328,25 @@ def main():
     parser.add_argument("--instance_name", type=str, default="oc8051gm0caddr", help="Instance name to analyze")
     parser.add_argument("--plot", action="store_true", help="Create comparison plot")
     parser.add_argument("--use_cache", action="store_true", help="Use cache")
+    parser.add_argument("--regression_only", action="store_true", help="Only run regression analysis")
+    parser.add_argument("--config", type=str, default="auto", 
+                       choices=["auto", "balanced", "exponential", "simple", "accurate", "custom"],
+                       help="PySR configuration type (default: auto - lets PySR discover the best form)")
     args = parser.parse_args()
 
-    run_pysr_and_check_with_llm(args.instance_name, args.use_cache)
-    if args.plot:
-        print("\n📊 Creating comparison plot...")
-        plot_path = plot_original_vs_llm_results(args.instance_name)
-        if plot_path:
-            print(f"✅ Plot saved to: {plot_path}")
-        else:
-            print("❌ Plot creation failed")
+    if args.regression_only:
+        model = run_pysr(args.instance_name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
+        print(f"Best equation: {model.sympy()}")
+        print(model)
+    else:
+        run_pysr_and_check_with_llm(args.instance_name, args.use_cache, args.config)
+        if args.plot:
+            print("\n📊 Creating comparison plot...")
+            plot_path = plot_original_vs_llm_results(args.instance_name)
+            if plot_path:
+                print(f"✅ Plot saved to: {plot_path}")
+            else:
+                print("❌ Plot creation failed")
 
     # names = get_all_instance_names()
 

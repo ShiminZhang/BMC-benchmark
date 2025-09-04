@@ -203,7 +203,7 @@ class LLMEquationAnalyzer:
             raise ValueError(f"Unsupported provider: {provider}. Choose 'gemini' or 'openai'")
     
     def find_upper_bound(self, equation: str, max_K: int, variable: str = "x0") -> Dict[str, Any]:
-        """Use LLM to analyze equation and find asymptotic upper bound
+        """Use LLM to analyze equation and find least upper bound
         
         Args:
             equation: Mathematical equation as string
@@ -215,7 +215,7 @@ class LLMEquationAnalyzer:
         # Clean the equation for better processing
         clean_equation = equation.replace("*", " * ").replace("/", " / ").replace("+", " + ").replace("-", " - ")
         
-        prompt = f"""What is the asymptotic upper bound formula of {clean_equation} when K is large?
+        prompt = f"""What is the least upper bound formula of {clean_equation} when K is large?
 
 Please analyze the given equation,  give your answer of the upper bound formula, the formula should either be an exponential function or a polynomial function. explain why it is the upper bound, analyze the complexity of the upper bound formula. You must provide all your answer in following JSON format!!!:
 {{
@@ -292,6 +292,21 @@ Please analyze the given equation,  give your answer of the upper bound formula,
                         return result
                     except json.JSONDecodeError as e:
                         print(f"Failed to parse extracted JSON: {e}")
+                        # Try to fix common LaTeX escape issues
+                        try:
+                            # Fix common LaTeX escape problems
+                            json_str = json_str.replace('\\exp', 'exp')  # Remove LaTeX escapes
+                            json_str = json_str.replace('\\to', 'to')
+                            json_str = json_str.replace('\\infty', 'infinity')
+                            json_str = json_str.replace('\\text{positive term}', 'positive term')
+                            json_str = json_str.replace('\\text{positive value}', 'positive value')
+                            
+                            # Try parsing again
+                            result = json.loads(json_str)
+                            return result
+                        except json.JSONDecodeError:
+                            pass
+                        
                         # Try a more aggressive approach - find the JSON structure
                         try:
                             # Look for the complete JSON structure manually
@@ -299,6 +314,13 @@ Please analyze the given equation,  give your answer of the upper bound formula,
                             end_idx = content.find('```', start_idx + 7)
                             if start_idx != -1 and end_idx != -1:
                                 json_content = content[start_idx + 7:end_idx].strip()
+                                # Apply the same LaTeX fixes
+                                json_content = json_content.replace('\\exp', 'exp')
+                                json_content = json_content.replace('\\to', 'to')
+                                json_content = json_content.replace('\\infty', 'infinity')
+                                json_content = json_content.replace('\\text{positive term}', 'positive term')
+                                json_content = json_content.replace('\\text{positive value}', 'positive value')
+                                
                                 result = json.loads(json_content)
                                 return result
                         except json.JSONDecodeError:
@@ -328,13 +350,51 @@ Please analyze the given equation,  give your answer of the upper bound formula,
         }
         
         # Try to extract key information using regex
-        upper_bound_match = re.search(r'upper bound[:\s]*([^.\n]+)', content, re.IGNORECASE)
-        if upper_bound_match:
-            result["upper_bound"] = upper_bound_match.group(1).strip()
+        # Look for upper bound in various formats
+        upper_bound_patterns = [
+            r'"upper_bound":\s*"([^"]+)"',  # JSON format
+            r'upper_bound[:\s]*([^.\n]+)',  # Plain text format
+            r'upper bound[:\s]*([^.\n]+)',  # Alternative spelling
+            r'upper bound[:\s]*([^,\n]+)',  # Comma separated
+        ]
         
-        confidence_match = re.search(r'confidence[:\s]*([0-9.]+)', content, re.IGNORECASE)
-        if confidence_match:
-            result["confidence"] = float(confidence_match.group(1))
+        for pattern in upper_bound_patterns:
+            upper_bound_match = re.search(pattern, content, re.IGNORECASE)
+            if upper_bound_match:
+                result["upper_bound"] = upper_bound_match.group(1).strip()
+                break
+        
+        # Look for confidence in various formats
+        confidence_patterns = [
+            r'"confidence":\s*([0-9.]+)',  # JSON format
+            r'confidence[:\s]*([0-9.]+)',  # Plain text format
+        ]
+        
+        for pattern in confidence_patterns:
+            confidence_match = re.search(pattern, content, re.IGNORECASE)
+            if confidence_match:
+                result["confidence"] = float(confidence_match.group(1))
+                break
+        
+        # Look for complexity notation
+        complexity_match = re.search(r'"complexity":\s*"([^"]+)"', content)
+        if complexity_match:
+            result["asymptotic_notation"] = complexity_match.group(1).strip()
+        
+        # If we still don't have an upper bound, try to extract from the reasoning
+        if not result["upper_bound"]:
+            # Look for mathematical expressions that might be upper bounds
+            math_patterns = [
+                r'exp\([^)]+\)',  # Exponential functions
+                r'O\([^)]+\)',    # Big O notation
+                r'[0-9.]+',       # Constants
+            ]
+            
+            for pattern in math_patterns:
+                math_match = re.search(pattern, content)
+                if math_match:
+                    result["upper_bound"] = math_match.group(0).strip()
+                    break
         
         return result
     
@@ -643,6 +703,24 @@ def parse_llm_upper_bound(upper_bound_str):
         # Handle scientific notation if present
         cleaned = re.sub(r'(\d+\.?\d*)[eE]([+-]?\d+)', r'\1*10**\2', cleaned)
         
+        # Handle common exponential notation variations
+        cleaned = cleaned.replace('e^', 'exp(')
+        cleaned = cleaned.replace('e^(', 'exp(')
+        
+        # Add closing parenthesis for exp if needed
+        if cleaned.startswith('exp(') and cleaned.count('(') > cleaned.count(')'):
+            cleaned += ')'
+        
+        # Handle O() notation - extract the content inside
+        o_match = re.search(r'O\(([^)]+)\)', cleaned)
+        if o_match:
+            cleaned = o_match.group(1)
+        
+        # Clean up common LLM formatting issues
+        cleaned = re.sub(r'\s+', '', cleaned)  # Remove all whitespace
+        cleaned = re.sub(r'([0-9])x0', r'\1*x0', cleaned)  # Add * between number and x0
+        cleaned = re.sub(r'x0([0-9])', r'x0*\1', cleaned)  # Add * between x0 and number
+        
         # Parse with sympy
         return sympify(cleaned)
         
@@ -688,8 +766,22 @@ def plot_original_vs_llm_results(instance_name):
         
         # Load LLM analysis
         llm_analysis = load_llm_analysis(instance_name)
-        llm_upper_bound = llm_analysis.get('upper_bound', '')
-        print(f"LLM upper bound: {llm_upper_bound}")
+        
+        # Handle both old and new LLM analysis formats
+        if isinstance(llm_analysis, dict):
+            # New format: parsed JSON with proper structure
+            llm_upper_bound = llm_analysis.get('upper_bound', '')
+            llm_confidence = llm_analysis.get('confidence', 0.0)
+            llm_complexity = llm_analysis.get('complexity', '')
+            print(f"LLM upper bound: {llm_upper_bound}")
+            print(f"LLM confidence: {llm_confidence}")
+            print(f"LLM complexity: {llm_complexity}")
+        else:
+            # Old format: fallback
+            llm_upper_bound = str(llm_analysis) if llm_analysis else ''
+            llm_confidence = 0.0
+            llm_complexity = ''
+            print(f"LLM upper bound: {llm_upper_bound}")
         
         # Create x range for plotting equations (extend beyond data range)
         x_min, x_max = x_data.min(), x_data.max()
@@ -722,8 +814,9 @@ def plot_original_vs_llm_results(instance_name):
                 try:
                     constant_value = float(llm_upper_bound)
                     # It's a constant - plot as horizontal line
+                    confidence_text = f" (Confidence: {llm_confidence:.2f})" if llm_confidence > 0 else ""
                     plt.axhline(y=constant_value, color='red', linewidth=2, 
-                              linestyle='--', label=f'LLM Upper Bound ({constant_value:.1f})', 
+                              linestyle='--', label=f'LLM Upper Bound ({constant_value:.1f}){confidence_text}', 
                               alpha=0.8)
                 except ValueError:
                     # It's not a simple constant, evaluate as equation
@@ -736,9 +829,10 @@ def plot_original_vs_llm_results(instance_name):
                         reasonable_mask_llm = valid_mask_llm & (y_llm <= y_plot_max) & (y_llm >= -y_plot_max)
                         
                         if np.any(reasonable_mask_llm):
+                            confidence_text = f" (Confidence: {llm_confidence:.2f})" if llm_confidence > 0 else ""
                             plt.plot(x_plot[reasonable_mask_llm], y_llm[reasonable_mask_llm], 
                                     color='red', linewidth=2, linestyle='--', 
-                                    label='LLM Upper Bound', alpha=0.8)
+                                    label=f'LLM Upper Bound{confidence_text}', alpha=0.8)
             except Exception as e:
                 print(f"Could not plot LLM upper bound: {e}")
         
@@ -761,10 +855,14 @@ def plot_original_vs_llm_results(instance_name):
         plt.ylim(max(0, y_data_min - 0.1 * (y_data_max - y_data_min)), 
                 y_data_max * 1.2)
         
-        # Add text box with equation info
+        # Add text box with equation info and LLM analysis details
         info_text = f"PySR: {original_equation[:60]}{'...' if len(original_equation) > 60 else ''}\n"
         if llm_upper_bound:
-            info_text += f"LLM: {llm_upper_bound[:60]}{'...' if len(llm_upper_bound) > 60 else ''}"
+            info_text += f"LLM: {llm_upper_bound[:60]}{'...' if len(llm_upper_bound) > 60 else ''}\n"
+            if llm_confidence > 0:
+                info_text += f"Confidence: {llm_confidence:.2f}\n"
+            if llm_complexity:
+                info_text += f"Complexity: {llm_complexity}"
         
         plt.text(0.02, 0.98, info_text, transform=plt.gca().transAxes, 
                 fontsize=9, verticalalignment='top', 
