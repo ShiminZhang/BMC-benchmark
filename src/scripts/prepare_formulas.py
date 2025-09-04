@@ -43,7 +43,7 @@ def generate_cnf(name, K):
     cnf_path = get_cnf_path(name, K)
     if os.path.exists(cnf_path): # TODO check if the cnf is valid
         return True
-    cnf_per_instance_dir = get_cnf_per_instance_dir(name, K)
+    cnf_per_instance_dir = get_cnf_per_instance_dir(name)
     aig_dir = get_aig_dir()
     aig_path = f"{aig_dir}/{name}.aig"
     os.system(f"./libs/bin/simplecar -bmc -k {K} -cnf {cnf_per_instance_dir} {aig_path}")
@@ -52,33 +52,35 @@ def generate_cnf(name, K):
     else:
         return False
 
-def generate_and_run_up_to_limit(name, solver, time_limit, k_limit):
+def generate_and_run_up_to_limit(name, solver, time_limit, k_limit, step = 10):
     LOG(f"Generating and running {name} with K<={k_limit} up to limit {time_limit}")
-    for i in range(1, k_limit):
+    step = 10
+    # cnf_per_instance_dir = get_cnf_per_instance_dir(name)
+    # generate cnf
+    for i in range(1, k_limit + 1, step):
         if generate_cnf(name, i):
             if not run_formula(name, i, solver, time_limit):
+                LOG(f"Failed to run formula {name} with K={i}, halting")
                 break
         else:
             LOG(f"Failed to generate CNF for {name} with K={i}, halting")
             return False
     return True
 
-def prepare_single(name, time_limit, k_limit):
+def prepare_single(name, time_limit, k_limit, step = 10):
     TOGGLE_SHOWLOG(True)
     time_limit = 1800
-    # k_limit = 1000
     solver = "./solvers/bin/cadical"
-    generate_and_run_up_to_limit(name, solver, time_limit, k_limit)
-    # process = multiprocessing.Process(target=generate_and_run_up_to_limit, args=(name, 1, solver, time_limit, k_limit))
-    # process.start()
-    # process.join()
+    generate_and_run_up_to_limit(name, solver, time_limit, k_limit, step)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", type=str, required=False)
     parser.add_argument("--time_limit", type=int, default=1600, required=False)
     parser.add_argument("--k_limit", type=int, default=5000, required=False)
+    parser.add_argument("--step", type=int, default=10, required=False)
     parser.add_argument("--manage", action="store_true", required=False)
+    parser.add_argument("--clear", action="store_true", required=False)
     args = parser.parse_args()
 
     if args.manage:
@@ -92,7 +94,12 @@ def main():
                 f"pf_{name}_{args.k_limit}", mem="16g", time="20:00:00"
                 )
     else:
-        prepare_single(args.name, args.time_limit, args.k_limit)
+        if args.clear:
+            cnf_per_instance_dir = get_cnf_per_instance_dir(args.name)
+            for file in os.listdir(cnf_per_instance_dir):
+                os.remove(os.path.join(cnf_per_instance_dir, file))
+        else:
+            prepare_single(args.name, args.time_limit, args.k_limit, args.step)
     # prepare_single("6s0", 1600, 100)
 
 if __name__ == "__main__":
