@@ -55,6 +55,19 @@ def get_pysr_results_dir():
         os.makedirs(dir)
     return dir
 
+def get_pysr_summary_dir():
+    dir = f"./results/pysr_summary/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_pysr_summary_path(name):
+    dir = get_pysr_summary_dir()
+    instance_dir = f"{dir}/{name}"
+    if not os.path.exists(instance_dir):
+        os.makedirs(instance_dir)
+    return f"{instance_dir}/{name}.json"
+
 def get_pysr_results_path(name):
     dir = get_pysr_results_dir()
     return f"{dir}/{name}.jl"

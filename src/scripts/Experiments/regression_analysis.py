@@ -6,14 +6,11 @@ import pickle
 import hashlib
 import pysr
 from ..category import get_all_instance_names
-from ..paths import get_solving_times_dir, get_pysr_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path
+from ..paths import get_solving_times_dir, get_pysr_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path
 import numpy as np
 import argparse
 from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results
-
-import juliacall
-juliacall.using("SymbolicRegression")
-juliacall.init()
+from .sympy_analysis import extract_leading_term
 
 def load_data(name):
     # load data from the solving_times directory
@@ -338,13 +335,14 @@ def main():
     parser.add_argument("--config", type=str, default="auto", 
                        choices=["auto", "balanced", "exponential", "simple", "accurate", "custom"],
                        help="PySR configuration type (default: auto - lets PySR discover the best form)")
+    parser.add_argument("--llm_analysis", action="store_true", help="Only run LLM analysis")
     args = parser.parse_args()
 
     if args.regression_only:
         model = run_pysr(args.instance_name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
         print(f"Best equation: {model.sympy()}")
         print(model)
-    else:
+    elif args.llm_analysis:
         run_pysr_and_check_with_llm(args.instance_name, args.use_cache, args.config)
         if args.plot:
             print("\n📊 Creating comparison plot...")
@@ -353,6 +351,28 @@ def main():
                 print(f"✅ Plot saved to: {plot_path}")
             else:
                 print("❌ Plot creation failed")
+    else:
+        names = get_all_instance_names()
+        for name in names:
+            if f"{name}.json" not in os.listdir(get_solving_times_dir()):
+                continue
+            
+            if os.path.exists(get_pysr_summary_path(name)) and False:
+                print(f"Loading leading term from {get_pysr_summary_path(name)}")
+                with open(get_pysr_summary_path(name), "r") as f:
+                    term = json.load(f)["leading_term"]
+                print(f"Leading term: {term}")
+            else:
+                model = run_pysr(name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
+
+                term = extract_leading_term(model.sympy())
+                result = {}
+                result["leading_term"] = str(term)
+                get_pysr_summary_path(name)
+                with open(get_pysr_summary_path(name), "w") as f:
+                    json.dump(result, f)
+                print(f"Leading term: {term}")
+                print(f"Saved to: {get_pysr_summary_path(name)}")
 
     # names = get_all_instance_names()
 
