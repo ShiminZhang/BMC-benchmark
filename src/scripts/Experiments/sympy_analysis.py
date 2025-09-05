@@ -6,6 +6,7 @@ from sympy import symbols, sympify, expand, Add, limit, oo
 def extract_leading_term(expr : str):
     print(f"Extracting leading term for {expr}")
     x = symbols("x")
+    expr = expand(expr)
     expr = sympify(expr)
     terms = expr.as_ordered_terms()
     leading_term = terms[0]

@@ -72,9 +72,24 @@ def get_pysr_results_path(name):
     dir = get_pysr_results_dir()
     return f"{dir}/{name}.jl"
 
-def get_pysr_summary_path(name):
-    dir = get_pysr_results_dir()
-    return f"{dir}/{name}.summary.json"
+def get_sympy_results_path(name):
+    dir = f"./results/sympy_results/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    instance_dir = f"{dir}/{name}"
+    if not os.path.exists(instance_dir):
+        os.makedirs(instance_dir)
+    return instance_dir
+
+def get_sympy_summary_path(name):
+    dir = get_sympy_results_path(name)
+    return f"{dir}/{name}.json"
+
+def get_conclusion_path(name):
+    dir = f"./results/conclusion/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return f"{dir}/{name}.json"
 
 def get_analysis_results_dir():
     dir = f"./results/llm_analysis_results/"
@@ -109,3 +124,9 @@ def get_plots_dir():
 def get_plot_path(name):
     dir = get_plots_dir()
     return f"{dir}/{name}.png"
+
+def get_results_dir():
+    dir = f"./results/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir

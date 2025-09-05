@@ -6,11 +6,14 @@ import pickle
 import hashlib
 import pysr
 from ..category import get_all_instance_names
-from ..paths import get_solving_times_dir, get_pysr_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path
+from ..paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path
 import numpy as np
 import argparse
-from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results
+from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation
 from .sympy_analysis import extract_leading_term
+import multiprocessing
+from multiprocessing import Pool, cpu_count
+import time
 
 def load_data(name):
     # load data from the solving_times directory
@@ -154,7 +157,8 @@ def get_pysr_config(config_type="balanced"):
             "niterations": 250,  # More iterations for better exploration
             "binary_operators": ["+", "-", "*", "^"],  # All basic operations
             "unary_operators": ["exp"],  # Include exponential functions
-            "constraints": {"maxdepth": 5},
+            "constraints": {"maxdepth": 5,'^': (-1, 1)},
+            "parsimony": 1e-5,
             "warm_start": False,
             # "maxsize": 20,  # Allow enough complexity for exponential terms if needed
             # "maxdepth": 10,
@@ -247,11 +251,22 @@ def get_pysr_config(config_type="balanced"):
 
 def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     # Load data first to get hash
-    data = load_data(name)
-    data_hash = get_data_hash(data) if use_cache else None
     
     # Check if cached model exists and is valid
     if use_cache:
+        print(f"Using cache for {name} with save_equation: {save_equation}")
+
+    data = load_data(name)
+    if len(data) == 0:
+        print(f"No data found for {name}")
+        return None
+    elif len(data) <= 5:
+        print(f"Not enough data ({len(data)}) found for {name}, using default configuration")
+        return None
+
+    data_hash = get_data_hash(data) if use_cache else None
+    if use_cache:
+        print(f"Loading cached model for {name} with data hash: {data_hash}")
         cached_model = load_cached_model(name, data_hash)
         if cached_model is not None:
             # Also save equation if requested
@@ -265,8 +280,18 @@ def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     # data.items() gives us (key, value) pairs, we need to separate them
     items = list(data.items())
     # Convert string keys to numeric values
-    x = [float(item[0]) for item in items]  # Convert string keys to float
-    y = [item[1] for item in items]  # Extract values as targets
+    
+    # k as x
+    k = [float(item[0]) for item in items]  # Convert string keys to float
+
+    # size as x
+    size = [float(item[1]["size_of_cnf"]) for item in items]  # Convert string keys to float
+
+    # time as y
+    time = [float(item[1]["solving_time"]) for item in items]  # Extract values as targets
+    
+    x = size
+    y = time  # Extract values as targets
     
     # Convert to numpy arrays if needed
     x = np.array(x).reshape(-1, 1)  # Reshape to 2D array for sklearn compatibility
@@ -298,6 +323,12 @@ def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     
     return model
 
+def get_sympy_summary(name):
+    path = get_sympy_summary_path(name)
+    with open(path, "r") as f:
+        data = json.load(f)
+    return data
+
 def batch_save_equations(names=None, use_cache=True, config_type="auto"):
     """Batch process instances and save their best equations"""
     if names is None:
@@ -326,20 +357,238 @@ def run_pysr_and_check_with_llm(name, use_cache=False, config_type="auto"):
     print(f"Best equation: {model.sympy()}")
     llm_analysis(name, use_cache=use_cache)
 
+def run_pysr_and_conclude_with_llm(name, use_cache=False, config_type="auto", plot=False):
+    model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
+    if model is None:
+        print(f"No model found for {name}")
+        return
+    sympy_summary = get_sympy_summary(name)
+    equation = sympy_summary["equation"]
+    leading_term = sympy_summary["leading_term"]
+    conclusion = llm_conclude_expression(name, equation, leading_term, use_cache)
+    if conclusion is None:
+        print(f"No conclusion found for {name}")
+        return
+    if plot:
+        print("\n📊 Creating comparison plot...")
+        llm_equation = conclusion["llm_upper_bound"]
+        equations ={"pysr_equation": equation, "leading_term": leading_term, "upper_bound": llm_equation}
+        plot_original_vs_equation(name, conclusion["type_of_equation"], equations, label="LLM_included")
+        equations ={"pysr_equation": equation, "leading_term": leading_term}
+        plot_original_vs_equation(name, conclusion["type_of_equation"], equations, label="original_only")
+
+def process_single_instance(args):
+    """Process a single instance by calling run_pysr_and_conclude_with_llm"""
+    instance_name, use_cache, config_type, plot = args
+    
+    # Capture stdout and stderr
+    import sys
+    from io import StringIO
+    import contextlib
+    
+    # Create string buffers to capture output
+    stdout_capture = StringIO()
+    stderr_capture = StringIO()
+    
+    try:
+        print(f"🔄 Processing {instance_name}...")
+        
+        # Capture stdout and stderr from the function call
+        with contextlib.redirect_stdout(stdout_capture), contextlib.redirect_stderr(stderr_capture):
+            run_pysr_and_conclude_with_llm(instance_name, use_cache, config_type, plot)
+        
+        # Get the captured output
+        stdout_output = stdout_capture.getvalue()
+        stderr_output = stderr_capture.getvalue()
+        
+        print(f"✅ {instance_name}: Completed successfully")
+        
+        # Print the captured output with instance prefix
+        if stdout_output.strip():
+            print(f"\n--- STDOUT for {instance_name} ---")
+            for line in stdout_output.strip().split('\n'):
+                print(f"[{instance_name}] {line}")
+            print(f"--- END STDOUT for {instance_name} ---\n")
+        
+        if stderr_output.strip():
+            print(f"\n--- STDERR for {instance_name} ---")
+            for line in stderr_output.strip().split('\n'):
+                print(f"[{instance_name}] {line}")
+            print(f"--- END STDERR for {instance_name} ---\n")
+        
+        return {
+            "instance_name": instance_name, 
+            "status": "success",
+            "stdout": stdout_output,
+            "stderr": stderr_output
+        }
+    except Exception as e:
+        print(f"❌ {instance_name}: {e}")
+        return {
+            "instance_name": instance_name, 
+            "status": "error", 
+            "error": str(e),
+            "stdout": stdout_capture.getvalue(),
+            "stderr": stderr_capture.getvalue()
+        }
+
+def parallel_llm_conclude_expression(instance_names=None, use_cache=False, config_type="auto", plot=False, max_workers=None):
+    """Run LLM conclude expression analysis on multiple instances in parallel
+    
+    Args:
+        instance_names: List of instance names to process. If None, processes all instances.
+        use_cache: Whether to use cached results
+        config_type: PySR configuration type
+        plot: Whether to create comparison plots
+        max_workers: Maximum number of parallel workers. If None, uses CPU count.
+        
+    Returns:
+        Dict containing results for all processed instances
+    """
+    if instance_names is None:
+        print("📋 Getting all instance names...")
+        instance_names = list(get_all_instance_names())
+    
+    if not instance_names:
+        print("⚠️  No instances found to process")
+        return {}
+    
+    print(f"🚀 Starting parallel LLM conclude expression analysis")
+    print(f"   Instances: {len(instance_names)}")
+    print(f"   Use cache: {use_cache}")
+    print(f"   Create plots: {plot}")
+    print(f"   Max workers: {max_workers or cpu_count()}")
+    print("=" * 60)
+    
+    # Prepare arguments for each instance
+    instance_args = [(name, use_cache, config_type, plot) for name in instance_names]
+    
+    # Set up multiprocessing
+    if max_workers is None:
+        max_workers = min(cpu_count(), len(instance_names))
+    
+    results = {}
+    start_time = time.time()
+    
+    try:
+        # Process all instances in parallel
+        with Pool(processes=max_workers) as pool:
+            all_results = pool.map(process_single_instance, instance_args)
+        
+        # Convert to dictionary
+        for result in all_results:
+            results[result["instance_name"]] = result
+    
+    except Exception as e:
+        print(f"❌ Parallel processing failed: {e}")
+        return {"error": str(e)}
+    
+    # Calculate statistics
+    end_time = time.time()
+    duration = end_time - start_time
+    
+    success_count = sum(1 for r in results.values() if r["status"] == "success")
+    error_count = sum(1 for r in results.values() if r["status"] == "error")
+    
+    # Print summary
+    print("\n" + "=" * 60)
+    print("📊 PARALLEL PROCESSING SUMMARY")
+    print("=" * 60)
+    print(f"⏱️  Total time: {duration:.2f} seconds")
+    print(f"📈 Total instances: {len(instance_names)}")
+    print(f"✅ Successful: {success_count}")
+    print(f"❌ Errors: {error_count}")
+    
+    if success_count > 0:
+        avg_time = duration / success_count
+        print(f"⚡ Average time per successful instance: {avg_time:.2f} seconds")
+    
+    # Show instances with output
+    instances_with_stdout = [name for name, result in results.items() if result.get("stdout", "").strip()]
+    instances_with_stderr = [name for name, result in results.items() if result.get("stderr", "").strip()]
+    
+    if instances_with_stdout:
+        print(f"📝 Instances with stdout output: {len(instances_with_stdout)}")
+    if instances_with_stderr:
+        print(f"⚠️  Instances with stderr output: {len(instances_with_stderr)}")
+    
+    return results
+
 def main():
     parser = argparse.ArgumentParser(description="Run PySR and check with LLM")
     parser.add_argument("--instance_name", type=str, default="oc8051gm0caddr", help="Instance name to analyze")
     parser.add_argument("--plot", action="store_true", help="Create comparison plot")
     parser.add_argument("--use_cache", action="store_true", help="Use cache")
+    parser.add_argument("--use_pysr_cache", action="store_true", help="Use PySR cache")
     parser.add_argument("--regression_only", action="store_true", help="Only run regression analysis")
     parser.add_argument("--config", type=str, default="auto", 
                        choices=["auto", "balanced", "exponential", "simple", "accurate", "custom"],
                        help="PySR configuration type (default: auto - lets PySR discover the best form)")
     parser.add_argument("--llm_analysis", action="store_true", help="Only run LLM analysis")
+    parser.add_argument("--find_insufficient_data", action="store_true", help="Find insufficient data")
+    parser.add_argument("--llm_conclude_expression", action="store_true", help="Only run LLM conclude expression")
+    parser.add_argument("--parallel_llm_conclude_expression", action="store_true", help="Parallel LLM conclude expression")
+    parser.add_argument("--max_workers", type=int, default=None, help="Maximum number of parallel workers for parallel processing")
+
     args = parser.parse_args()
 
+    pysr_use_cache = args.use_pysr_cache or args.use_cache
+
+    if args.parallel_llm_conclude_expression:
+        interested_names = get_all_instance_names()
+        interested_names = list(interested_names)[:10]
+        # interested_names = ["6s0", "6s109", "bob2"]
+        print("🚀 Starting parallel LLM conclude expression analysis...")
+        results = parallel_llm_conclude_expression(
+            instance_names=interested_names,
+            use_cache=args.use_cache,
+            config_type=args.config,
+            plot=args.plot,
+            max_workers=args.max_workers
+        )
+        #save the results to temp file
+        results_dir = get_results_dir()
+        output_file = os.path.join(results_dir, "parallel_llm_conclude_expression.json")
+        with open(output_file, "w") as f:
+            json.dump(results, f, indent=4)
+        
+        # Save stdout/stderr to separate files for easier debugging
+        stdout_dir = os.path.join(results_dir, "parallel_stdout")
+        os.makedirs(stdout_dir, exist_ok=True)
+        
+        for instance_name, result in results.items():
+            if result.get("stdout", "").strip():
+                stdout_file = os.path.join(stdout_dir, f"{instance_name}_stdout.txt")
+                with open(stdout_file, "w") as f:
+                    f.write(result["stdout"])
+            
+            if result.get("stderr", "").strip():
+                stderr_file = os.path.join(stdout_dir, f"{instance_name}_stderr.txt")
+                with open(stderr_file, "w") as f:
+                    f.write(result["stderr"])
+        
+        print(f"✅ Parallel processing completed. Processed {len(results)} instances.")
+        print(f"📁 Results saved to: {output_file}")
+        print(f"📁 Individual stdout/stderr saved to: {stdout_dir}")
+        return
+        
+    if args.find_insufficient_data:
+        results_dir = get_results_dir()
+        output_file = os.path.join(results_dir, "insufficient_data.txt")
+        results = []
+        for name in get_all_instance_names():
+            if f"{name}.json" not in os.listdir(get_solving_times_dir()):
+                continue
+            data = load_data(name)
+            if len(data) <= 5:
+                results.append(name)
+        with open(output_file, "w") as f:
+            f.write(str(results))
+        print(f"Insufficient data for {len(results)} instances saved to {output_file}")
+        return
+
     if args.regression_only:
-        model = run_pysr(args.instance_name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
+        model = run_pysr(args.instance_name, use_cache=pysr_use_cache, save_equation=True, config_type=args.config)
         print(f"Best equation: {model.sympy()}")
         print(model)
     elif args.llm_analysis:
@@ -351,38 +600,32 @@ def main():
                 print(f"✅ Plot saved to: {plot_path}")
             else:
                 print("❌ Plot creation failed")
+    elif args.llm_conclude_expression:
+        print(f"Using cache: {args.use_cache}")
+        run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot) 
     else:
         names = get_all_instance_names()
         for name in names:
             if f"{name}.json" not in os.listdir(get_solving_times_dir()):
                 continue
             
-            if os.path.exists(get_pysr_summary_path(name)) and False:
-                print(f"Loading leading term from {get_pysr_summary_path(name)}")
-                with open(get_pysr_summary_path(name), "r") as f:
+            if os.path.exists(get_sympy_summary_path(name)) and False:
+                print(f"Loading leading term from {get_sympy_summary_path(name)}")
+                with open(get_sympy_summary_path(name), "r") as f:
                     term = json.load(f)["leading_term"]
                 print(f"Leading term: {term}")
             else:
                 model = run_pysr(name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
-
                 term = extract_leading_term(model.sympy())
                 result = {}
+                result["equation"] = str(model.sympy())
                 result["leading_term"] = str(term)
-                get_pysr_summary_path(name)
-                with open(get_pysr_summary_path(name), "w") as f:
-                    json.dump(result, f)
                 print(f"Leading term: {term}")
-                print(f"Saved to: {get_pysr_summary_path(name)}")
+                print(f"Saved to: {get_sympy_summary_path(name)}")
+                with open(get_sympy_summary_path(name), "w") as f:
+                    json.dump(result, f, indent=4)
 
-    # names = get_all_instance_names()
-
-    # for name in names:
-    #     print(f"\n=== Processing {name} ===")
-        
-    #     # Run PySR with caching and automatic equation saving
-    #     model = run_pysr(name, use_cache=True, save_equation=True)
-        
-    #     print(f"Best equation: {model.sympy()}")
+                
 
 if __name__ == "__main__":
     main()

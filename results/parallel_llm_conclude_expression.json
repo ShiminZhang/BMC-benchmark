@@ -1,0 +1,68 @@
+{
+    "oc8051gm0caddr": {
+        "instance_name": "oc8051gm0caddr",
+        "status": "success",
+        "stdout": "Using cache for oc8051gm0caddr with save_equation: True\nLoading cached model for oc8051gm0caddr with data hash: a6203d46d4e37bbda37cfbcbe2d83735\nLoaded cached model for oc8051gm0caddr\nSaved best equation for oc8051gm0caddr: x0*((0.5243481**x0)**exp(x0*(-0.4451682)) - 1*(-1.9601973))\nAnalyzing expression for instance: oc8051gm0caddr\n==================================================\nNo conclusion found for oc8051gm0caddr\n",
+        "stderr": ""
+    },
+    "csmacdp2": {
+        "instance_name": "csmacdp2",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/csmacdp2.json'",
+        "stdout": "Using cache for csmacdp2 with save_equation: True\n",
+        "stderr": ""
+    },
+    "139452p0": {
+        "instance_name": "139452p0",
+        "status": "success",
+        "stdout": "Using cache for 139452p0 with save_equation: True\nLoading cached model for 139452p0 with data hash: d07f47900bf07050331db39126e7a5d4\nLoaded cached model for 139452p0\nSaved best equation for 139452p0: x0*(0.006312001 + x0*(-1.9675845e-7)) - 1*0.17965728\nAnalyzing expression for instance: 139452p0\n==================================================\nNo conclusion found for 139452p0\n",
+        "stderr": ""
+    },
+    "zipcpu-pfcache-p13": {
+        "instance_name": "zipcpu-pfcache-p13",
+        "status": "success",
+        "stdout": "Using cache for zipcpu-pfcache-p13 with save_equation: True\nLoading cached model for zipcpu-pfcache-p13 with data hash: e6a471f32bce42d104f80fab3eb9fb3e\nLoaded cached model for zipcpu-pfcache-p13\nSaved best equation for zipcpu-pfcache-p13: x0**1.0678383*0.017542707\nAnalyzing expression for instance: zipcpu-pfcache-p13\n==================================================\nNo conclusion found for zipcpu-pfcache-p13\n",
+        "stderr": ""
+    },
+    "bobsmdct": {
+        "instance_name": "bobsmdct",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/bobsmdct.json'",
+        "stdout": "Using cache for bobsmdct with save_equation: True\n",
+        "stderr": ""
+    },
+    "beemfwt2b2": {
+        "instance_name": "beemfwt2b2",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/beemfwt2b2.json'",
+        "stdout": "Using cache for beemfwt2b2 with save_equation: True\n",
+        "stderr": ""
+    },
+    "oski15a08b07s": {
+        "instance_name": "oski15a08b07s",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/oski15a08b07s.json'",
+        "stdout": "Using cache for oski15a08b07s with save_equation: True\n",
+        "stderr": ""
+    },
+    "qspiflash_dualflexpress_divfive-p092": {
+        "instance_name": "qspiflash_dualflexpress_divfive-p092",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/qspiflash_dualflexpress_divfive-p092.json'",
+        "stdout": "Using cache for qspiflash_dualflexpress_divfive-p092 with save_equation: True\n",
+        "stderr": ""
+    },
+    "qspiflash_dualflexpress_divfive-p079": {
+        "instance_name": "qspiflash_dualflexpress_divfive-p079",
+        "status": "success",
+        "stdout": "Using cache for qspiflash_dualflexpress_divfive-p079 with save_equation: True\nLoading cached model for qspiflash_dualflexpress_divfive-p079 with data hash: 4a1cb1d845739355fa02650d944f7d69\nLoaded cached model for qspiflash_dualflexpress_divfive-p079\nSaved best equation for qspiflash_dualflexpress_divfive-p079: (x0*0.05264952)**1.6443506\nAnalyzing expression for instance: qspiflash_dualflexpress_divfive-p079\n==================================================\nNo conclusion found for qspiflash_dualflexpress_divfive-p079\n",
+        "stderr": ""
+    },
+    "bobtuint12neg": {
+        "instance_name": "bobtuint12neg",
+        "status": "error",
+        "error": "[Errno 2] No such file or directory: './results/solving_times/bobtuint12neg.json'",
+        "stdout": "Using cache for bobtuint12neg with save_equation: True\n",
+        "stderr": ""
+    }
+}

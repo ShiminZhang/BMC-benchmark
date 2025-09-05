@@ -3,7 +3,8 @@ import os
 import re
 import math
 from typing import Dict, Any, Tuple, Optional
-from ..paths import get_pysr_summary_path, get_analysis_results_path, get_analysis_raw_output_path, get_solving_times_path, get_plot_path
+
+from ..paths import get_pysr_summary_path, get_analysis_results_path, get_analysis_raw_output_path, get_solving_times_path, get_plot_path, get_conclusion_path
 from ..config import get_config_manager
 import argparse
 from datetime import datetime
@@ -31,8 +32,11 @@ except ImportError:
 def load_regression_equation(name):
     """Load regression equation from PySR summary file"""
     path = get_pysr_summary_path(name)
-    with open(path, "r") as f:
-        data = json.load(f)
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        raise ValueError(f"Failed to load regression equation from {path}: {e}")
     
     # Handle different data formats
     if isinstance(data, str):
@@ -202,6 +206,102 @@ class LLMEquationAnalyzer:
         else:
             raise ValueError(f"Unsupported provider: {provider}. Choose 'gemini' or 'openai'")
     
+    def _parse_llm_response(self, content: str) -> Dict[str, Any]:
+        """Parse LLM response content to extract JSON with robust error handling
+        
+        Args:
+            content: Raw content from LLM response
+            
+        Returns:
+            Parsed JSON as dictionary
+        """
+        import re
+        
+        # Clean the content
+        content = content.strip()
+        
+        # Try to find JSON block in the response
+        # Look for content between ```json and ``` or just ``` and ```
+        json_patterns = [
+            r'```json\s*(.*?)\s*```',
+            r'```\s*(.*?)\s*```',
+            r'\{.*\}',  # Look for any JSON object
+        ]
+        
+        json_content = None
+        for pattern in json_patterns:
+            match = re.search(pattern, content, re.DOTALL)
+            if match:
+                json_content = match.group(1).strip()
+                break
+        
+        # If no pattern matched, try the whole content
+        if json_content is None:
+            json_content = content
+        
+        # Try to parse as JSON
+        try:
+            result = json.loads(json_content)
+            
+            # Validate that we have the expected fields
+            expected_fields = ["upper_bound", "reasoning", "type_of_equation", "confidence", "complexity"]
+            missing_fields = [field for field in expected_fields if field not in result]
+            
+            if missing_fields:
+                print(f"Warning: Missing expected fields in LLM response: {missing_fields}")
+                # Fill in missing fields with defaults
+                for field in missing_fields:
+                    if field == "upper_bound":
+                        result[field] = "unknown"
+                    elif field == "reasoning":
+                        result[field] = "Unable to determine reasoning"
+                    elif field == "type_of_equation":
+                        result[field] = "unknown"
+                    elif field == "confidence":
+                        result[field] = 0.0
+                    elif field == "complexity":
+                        result[field] = "unknown"
+            
+            return result
+            
+        except json.JSONDecodeError as e:
+            # If JSON parsing fails, try to extract information manually
+            print(f"Warning: Failed to parse JSON from LLM response: {e}")
+            print(f"Raw content: {content[:200]}...")
+            
+            # Try to extract information using regex patterns
+            result = {
+                "upper_bound": "unknown",
+                "reasoning": "Unable to parse LLM response",
+                "type_of_equation": "unknown", 
+                "confidence": 0.0,
+                "complexity": "unknown",
+                "thinking": content[:500] if content else "No content received"
+            }
+            
+            # Try to extract specific patterns
+            patterns = {
+                "upper_bound": r'upper_bound["\']?\s*:\s*["\']?([^"\'}\s,]+)',
+                "reasoning": r'reasoning["\']?\s*:\s*["\']?([^"\'}]+)',
+                "type_of_equation": r'type_of_equation["\']?\s*:\s*["\']?([^"\'}\s,]+)',
+                "confidence": r'confidence["\']?\s*:\s*([0-9.]+)',
+                "complexity": r'complexity["\']?\s*:\s*["\']?([^"\'}\s,]+)'
+            }
+            
+            for field, pattern in patterns.items():
+                match = re.search(pattern, content, re.IGNORECASE)
+                if match:
+                    value = match.group(1).strip()
+                    if field == "confidence":
+                        try:
+                            result[field] = float(value)
+                        except ValueError:
+                            result[field] = 0.0
+                    else:
+                        result[field] = value
+            
+            return result
+    
     def find_upper_bound(self, equation: str, max_K: int, variable: str = "x0") -> Dict[str, Any]:
         """Use LLM to analyze equation and find least upper bound
         
@@ -217,10 +317,11 @@ class LLMEquationAnalyzer:
         
         prompt = f"""What is the least upper bound formula of {clean_equation} when K is large?
 
-Please analyze the given equation,  give your answer of the upper bound formula, the formula should either be an exponential function or a polynomial function. explain why it is the upper bound, analyze the complexity of the upper bound formula. You must provide all your answer in following JSON format!!!:
+Please analyze the given equation,  give your answer of the upper bound formula. ** means power 2**2 is 2^2. the formula should either be an exponential function or a polynomial function with integer exponent. X^K with K<=1 is still linear, not polynomial! Explain why it is the upper bound, analyze the complexity of the upper bound formula. You must provide all your answer in following JSON format!!!:
 {{
     "thinking": "",
     "reasoning": "",
+    "type_of_equation": one of "linear", "polynomial", "exponential", "unknown",
     "upper_bound": "x + 5",
     "confidence": 0.9,
     "complexity": "O(x)"
@@ -274,61 +375,11 @@ Please analyze the given equation,  give your answer of the upper bound formula,
             else:
                 raise ValueError(f"Unsupported provider: {self.provider}")
             
-            # Try to parse JSON response
-            try:
-                # First try direct JSON parsing
-                result = json.loads(content)
-                return result
-            except json.JSONDecodeError:
-                # Try to extract JSON from markdown code blocks
-                json_match = re.search(r'```json\s*(\{.*?\})\s*```', content, re.DOTALL)
-                if json_match:
-                    try:
-                        json_str = json_match.group(1)
-                        # Clean up the JSON string - remove extra whitespace and fix newlines
-                        json_str = re.sub(r'\n\s*', ' ', json_str)  # Replace newlines with spaces
-                        json_str = re.sub(r'\s+', ' ', json_str)    # Normalize whitespace
-                        result = json.loads(json_str)
-                        return result
-                    except json.JSONDecodeError as e:
-                        print(f"Failed to parse extracted JSON: {e}")
-                        # Try to fix common LaTeX escape issues
-                        try:
-                            # Fix common LaTeX escape problems
-                            json_str = json_str.replace('\\exp', 'exp')  # Remove LaTeX escapes
-                            json_str = json_str.replace('\\to', 'to')
-                            json_str = json_str.replace('\\infty', 'infinity')
-                            json_str = json_str.replace('\\text{positive term}', 'positive term')
-                            json_str = json_str.replace('\\text{positive value}', 'positive value')
-                            
-                            # Try parsing again
-                            result = json.loads(json_str)
-                            return result
-                        except json.JSONDecodeError:
-                            pass
-                        
-                        # Try a more aggressive approach - find the JSON structure
-                        try:
-                            # Look for the complete JSON structure manually
-                            start_idx = content.find('```json')
-                            end_idx = content.find('```', start_idx + 7)
-                            if start_idx != -1 and end_idx != -1:
-                                json_content = content[start_idx + 7:end_idx].strip()
-                                # Apply the same LaTeX fixes
-                                json_content = json_content.replace('\\exp', 'exp')
-                                json_content = json_content.replace('\\to', 'to')
-                                json_content = json_content.replace('\\infty', 'infinity')
-                                json_content = json_content.replace('\\text{positive term}', 'positive term')
-                                json_content = json_content.replace('\\text{positive value}', 'positive value')
-                                
-                                result = json.loads(json_content)
-                                return result
-                        except json.JSONDecodeError:
-                            pass
-                
-                print(f"JSON parsing failed: {content}, try to parse manually")
-                # If JSON parsing fails, extract information manually
-                return self._parse_llm_response(content)
+
+            # Parse the content to JSON with robust error handling
+            result = self._parse_llm_response(content)
+            return result
+            
                 
         except Exception as e:
             return {
@@ -336,86 +387,11 @@ Please analyze the given equation,  give your answer of the upper bound formula,
                 "upper_bound": None,
                 "reasoning": None,
                 "confidence": 0.0,
-                "growth_rate": "unknown"
+                "growth_rate": "unknown",
+                "type_of_equation": "unknown"
             }
     
-    def _parse_llm_response(self, content: str) -> Dict[str, Any]:
-        """Parse non-JSON LLM response for upper bound analysis"""
-        result = {
-            "upper_bound": None,
-            "reasoning": content,
-            "confidence": 0.5,
-            "growth_rate": "unknown",
-            "asymptotic_notation": "unknown"
-        }
-        
-        # Try to extract key information using regex
-        # Look for upper bound in various formats
-        upper_bound_patterns = [
-            r'"upper_bound":\s*"([^"]+)"',  # JSON format
-            r'upper_bound[:\s]*([^.\n]+)',  # Plain text format
-            r'upper bound[:\s]*([^.\n]+)',  # Alternative spelling
-            r'upper bound[:\s]*([^,\n]+)',  # Comma separated
-        ]
-        
-        for pattern in upper_bound_patterns:
-            upper_bound_match = re.search(pattern, content, re.IGNORECASE)
-            if upper_bound_match:
-                result["upper_bound"] = upper_bound_match.group(1).strip()
-                break
-        
-        # Look for confidence in various formats
-        confidence_patterns = [
-            r'"confidence":\s*([0-9.]+)',  # JSON format
-            r'confidence[:\s]*([0-9.]+)',  # Plain text format
-        ]
-        
-        for pattern in confidence_patterns:
-            confidence_match = re.search(pattern, content, re.IGNORECASE)
-            if confidence_match:
-                result["confidence"] = float(confidence_match.group(1))
-                break
-        
-        # Look for complexity notation
-        complexity_match = re.search(r'"complexity":\s*"([^"]+)"', content)
-        if complexity_match:
-            result["asymptotic_notation"] = complexity_match.group(1).strip()
-        
-        # If we still don't have an upper bound, try to extract from the reasoning
-        if not result["upper_bound"]:
-            # Look for mathematical expressions that might be upper bounds
-            math_patterns = [
-                r'exp\([^)]+\)',  # Exponential functions
-                r'O\([^)]+\)',    # Big O notation
-                r'[0-9.]+',       # Constants
-            ]
-            
-            for pattern in math_patterns:
-                math_match = re.search(pattern, content)
-                if math_match:
-                    result["upper_bound"] = math_match.group(0).strip()
-                    break
-        
-        return result
-    
-    def _parse_complexity_response(self, content: str) -> Dict[str, Any]:
-        """Parse non-JSON LLM response for complexity analysis"""
-        result = {
-            "time_complexity": "unknown",
-            "space_complexity": "unknown", 
-            "complexity_class": "unknown",
-            "practical_implications": content
-        }
-        
-        # Try to extract complexity information
-        time_complexity_match = re.search(r'O\([^)]+\)', content)
-        if time_complexity_match:
-            result["time_complexity"] = time_complexity_match.group(0)
-        
-        return result
-
-
-def analyze_equation_with_llm(name: str, api_key: Optional[str] = None, provider: str = None, model: str = None) -> Dict[str, Any]:
+def analyze_equation_with_llm(name: str = None, api_key: Optional[str] = None, provider: str = None, model: str = None, equation: str = None) -> Dict[str, Any]:
     """Complete analysis pipeline: load equation, find upper bound, analyze complexity
     
     Args:
@@ -427,10 +403,16 @@ def analyze_equation_with_llm(name: str, api_key: Optional[str] = None, provider
     Returns:
         Complete analysis results
     """
+
+    if equation is None and name:
+        print(f"Loading equation for {name}")
+        equation = load_regression_equation(name)
+        assert equation is not None, f"Equation not found for {name}"
+        return analyze_equation_with_llm(name=name, api_key=api_key, provider=provider, model=model, equation=equation)
+    
     try:
         # Load the regression equation
-        equation = load_regression_equation(name)
-        print(f"Loaded equation for {name}: {equation}")
+        print(f"Loaded equation for {name if name else 'instance'}: {equation}")
         
         # Initialize LLM analyzer (will use config manager for defaults)
         analyzer = LLMEquationAnalyzer(api_key=api_key, model=model, provider=provider)
@@ -528,8 +510,56 @@ def analyze_equation_heuristic(name: str) -> Dict[str, Any]:
             "analysis_method": "heuristic"
         }
 
-def llm_analysis(instance_name, use_cache=False):
+def llm_conclude_expression(instance_name, equation,leading_term, use_cache=False):
+    print(f"Analyzing expression for instance: {instance_name}")
+    print("=" * 50)
+    expression = leading_term
+    # Check if API keys are available via config manager
+    config_manager = get_config_manager()
+    default_provider = config_manager.get_default_provider()
+    api_key = config_manager.get_api_key(default_provider)
 
+    if not api_key:
+        print(f"No API key found for {default_provider}. Please set it using config manager or environment variables.")
+        return
+    
+    cache_path = get_conclusion_path(instance_name)
+    if os.path.exists(cache_path) and use_cache:
+        print(f"Conclusion loaded from cache: {cache_path}")
+        try:
+            with open(cache_path, 'r') as f:
+                results = json.load(f)
+            print( f"Original equation: {expression}")
+            print(f"LLM concluded equation: {results['llm_upper_bound']}")
+            return results
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Warning: Failed to load cache from {cache_path}: {e}")
+            # Continue without cache
+            use_cache = False
+    
+    if not use_cache:
+        equation = expression
+        results = analyze_equation_with_llm(instance_name, api_key=api_key, provider=default_provider, equation=equation)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        conclusion = {}
+        conclusion["timestamp"] = timestamp
+        conclusion["original_equation"] = equation
+        conclusion["llm_upper_bound"] = results["upper_bound"]
+        conclusion["reasoning"] = results["reasoning"]
+        conclusion["llm_confidence"] = results["confidence"]
+        conclusion["llm_complexity"] = results["complexity"]
+        conclusion["instance_name"] = instance_name
+        conclusion["leading_term"] = leading_term
+        conclusion["type_of_equation"] = results["type_of_equation"]
+        with open(cache_path, 'w') as f:
+            json.dump(conclusion, f, indent=2)
+        print( f"Original equation: {expression}")
+        print(f"LLM concluded equation: {conclusion['llm_upper_bound']}")
+        print(f"Results saved to cache: {cache_path}")
+        print(f"Type of equation: {results['type_of_equation']}")
+        return conclusion
+
+def llm_analysis(instance_name, use_cache=False):
     print(f"Analyzing equation for instance: {instance_name}")
     print("=" * 50)
     
@@ -569,10 +599,16 @@ def llm_analysis(instance_name, use_cache=False):
         # results = analyze_equation_with_llm(instance_name, api_key=api_key, provider=default_provider)
         cache_path = get_analysis_raw_output_path(instance_name)
         if os.path.exists(cache_path) and use_cache:
-            with open(cache_path, 'r') as f:
-                results = json.load(f)
-            print(f"Results loaded from cache: {cache_path}")
-        else:
+            try:
+                with open(cache_path, 'r') as f:
+                    results = json.load(f)
+                print(f"Results loaded from cache: {cache_path}")
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Warning: Failed to load cache from {cache_path}: {e}")
+                # Continue without cache
+                use_cache = False
+        
+        if not use_cache:
             results = analyze_equation_with_llm(instance_name, api_key=api_key, provider=default_provider)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             results["timestamp"] = timestamp
@@ -617,8 +653,11 @@ def load_original_data(instance_name):
     if not os.path.exists(solving_times_path):
         raise FileNotFoundError(f"Solving times file not found: {solving_times_path}")
     
-    with open(solving_times_path, 'r') as f:
-        data = json.load(f)
+    try:
+        with open(solving_times_path, 'r') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        raise ValueError(f"Failed to load solving times from {solving_times_path}: {e}")
     
     # Convert string keys to float and extract values
     x_data = [float(k) for k in data.keys()]
@@ -634,8 +673,11 @@ def load_llm_analysis(instance_name):
     if not os.path.exists(analysis_path):
         raise FileNotFoundError(f"LLM analysis file not found: {analysis_path}")
     
-    with open(analysis_path, 'r') as f:
-        analysis = json.load(f)
+    try:
+        with open(analysis_path, 'r') as f:
+            analysis = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        raise ValueError(f"Failed to load LLM analysis from {analysis_path}: {e}")
     
     return analysis
 
@@ -729,6 +771,45 @@ def parse_llm_upper_bound(upper_bound_str):
         return None
 
 
+def plot_original_vs_equation(instance_name, type_of_equation: str, equations : Dict[str, str],label=""):
+    """
+    Plot comparison of original data and equation
+    """
+    x_data, y_data = load_original_data(instance_name)
+    
+    # Create the plot - MUST be at the beginning
+    plt.figure(figsize=(12, 8))
+    
+    # Plot original data points
+    plt.scatter(x_data, y_data, color='black', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    print(f"Plotting equations: {equations}")
+    # Plot equations
+    for key, equation in equations.items():
+        print(f"Plotting equation {key}: {equation}")
+        x_plot = np.linspace(x_data.min(), x_data.max(), 1000)
+        y_equation = safe_evaluate_equation(equation, x_plot)
+        
+        # Create unique label for each equation
+        equation_label = f"{key}: {equation}"
+        plt.plot(x_plot, y_equation, linewidth=2, label=equation_label, alpha=0.8)
+    type_of_equation_label = f"Growth type: {type_of_equation}"
+    plt.text(0.02, 0.98, type_of_equation_label, transform=plt.gca().transAxes, 
+            fontsize=9, verticalalignment='top', 
+            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    plt.xlabel('K (Input Size)', fontsize=12)
+    plt.ylabel('Solving Time (seconds)', fontsize=12)
+    plt.title(f'Comparison: Original Data vs Equation\nInstance: {instance_name}', 
+             fontsize=14, pad=20)
+    plt.legend(fontsize=10, loc='best')
+    plt.grid(True, alpha=0.3)
+    figure_path = get_plot_path(instance_name)
+    figure_path = figure_path.replace(".png", f"_{label}.png")
+    plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"Plot saved to: {figure_path}")
+    plt.close()
+    return figure_path
+
 def plot_original_vs_llm_results(instance_name):
     """
     Plot comparison of original data, PySR equation, and LLM upper bound
@@ -788,7 +869,7 @@ def plot_original_vs_llm_results(instance_name):
         x_range = x_max - x_min
         x_plot = np.linspace(max(1, x_min - 0.1 * x_range), x_max + 0.1 * x_range, 1000)
         
-        # Create the plot
+        # Create the plot - MUST be at the beginning
         plt.figure(figsize=(12, 8))
         
         # Plot original data points
