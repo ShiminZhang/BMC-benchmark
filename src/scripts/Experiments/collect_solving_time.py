@@ -25,8 +25,12 @@ def collect_solving_time(formula_dir, time_limit=0, k_limit=0):
     
     output_dict = {}
     for log_file in log_files:
-        name = log_file.split(".")[0]
-        k = int(log_file.split(".")[1])
+        splitted = log_file.split(".")
+        if len(splitted) != 3:
+            LOG(f"log_file {log_file} is not valid, skipping")
+            continue
+        name = splitted[0]
+        k = int(splitted[1])
         cnf_path = get_cnf_path(name, k)
         with open(cnf_path, "r") as f:
             number_of_lines = len(f.readlines())
@@ -47,12 +51,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--formula_dir", type=str, required=False)
     parser.add_argument("--all", action="store_true", default=False)
+    parser.add_argument("--all_slurm", action="store_true", default=False)
 
     args = parser.parse_args()
     if args.all:
         solving_log_dir = get_solving_log_dir()
         for formula_dir in os.listdir(solving_log_dir):
             collect_solving_time(os.path.join(solving_log_dir, formula_dir))
+    elif args.all_slurm:
+        solving_log_dir = get_solving_log_dir()
+        activate_python = "source ../general/bin/activate"
+        for formula_dir in os.listdir(solving_log_dir):
+            wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {os.path.join(solving_log_dir, formula_dir)}"
+            os.system(f"sbatch --job-name=collect_solving_time_{formula_dir} --output={os.path.join(solving_log_dir, formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
     else:
         collect_solving_time(args.formula_dir)
 

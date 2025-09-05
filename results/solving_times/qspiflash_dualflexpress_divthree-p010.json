@@ -1,13 +1,46 @@
 {
-    "1": 0.01,
-    "11": 0.07,
-    "21": 0.48,
-    "31": 1.87,
-    "41": 7.07,
-    "51": 15.65,
-    "61": 70.87,
-    "71": 160.69,
-    "81": 438.11,
-    "91": 755.61,
-    "101": 1689.89
+    "1": {
+        "solving_time": 0.01,
+        "size_of_cnf": 17540
+    },
+    "11": {
+        "solving_time": 0.07,
+        "size_of_cnf": 103560
+    },
+    "21": {
+        "solving_time": 0.48,
+        "size_of_cnf": 189580
+    },
+    "31": {
+        "solving_time": 1.87,
+        "size_of_cnf": 275600
+    },
+    "41": {
+        "solving_time": 7.07,
+        "size_of_cnf": 361620
+    },
+    "51": {
+        "solving_time": 15.65,
+        "size_of_cnf": 447640
+    },
+    "61": {
+        "solving_time": 70.87,
+        "size_of_cnf": 533660
+    },
+    "71": {
+        "solving_time": 160.69,
+        "size_of_cnf": 619680
+    },
+    "81": {
+        "solving_time": 438.11,
+        "size_of_cnf": 705700
+    },
+    "91": {
+        "solving_time": 755.61,
+        "size_of_cnf": 791720
+    },
+    "101": {
+        "solving_time": 1689.89,
+        "size_of_cnf": 877740
+    }
 }

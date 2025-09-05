@@ -1,7 +1,22 @@
 {
-    "1": 0.0,
-    "11": 0.1,
-    "21": 3.3,
-    "31": 53.47,
-    "41": 832.96
+    "1": {
+        "solving_time": 0.0,
+        "size_of_cnf": 6323
+    },
+    "11": {
+        "solving_time": 0.1,
+        "size_of_cnf": 37203
+    },
+    "21": {
+        "solving_time": 3.3,
+        "size_of_cnf": 68083
+    },
+    "31": {
+        "solving_time": 53.47,
+        "size_of_cnf": 98963
+    },
+    "41": {
+        "solving_time": 832.96,
+        "size_of_cnf": 129843
+    }
 }

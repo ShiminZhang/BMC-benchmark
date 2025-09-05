@@ -82,14 +82,15 @@ def main():
     parser.add_argument("--manage", action="store_true", required=False)
     parser.add_argument("--clear", action="store_true", required=False)
     args = parser.parse_args()
-
+    insufficent_names = ['picorv32_mutCY_nomem-p3', 'oski15a01b70s', '6s207rb28', 'beemlann2f1', 'pdtvisns3p02', 'cal123', '6s0', '6s428rb098', 'oski15a01b51s', 'pdtpmscoherence', 'cal118', 'cal143', 'beemlifts2b1', 'arbitrated_top_n3_w16_d128_e0', 'shift_register_top_w16_d64_e0', '6s13', '6s38', 'beemandrsn4b1', 'oski15a01b41s', 'arbitrated_top_n3_w8_d128_e0', 'oski15a01b03s', 'cal176', '6s404rb4', '6s357r', 'intel066', 'cal149', 'oski15a08b15s', 'oski15a08b03s', 'cal81', 'oski15a08b14s', 'oski15a01b59s', 'cal86', '6s31', 'oski15a01b02s', '6s350rb46', '6s350rb35', 'cal129', 'oski15a08b05s', 'cal34', 'picorv32_mutBY_nomem-p7', '6s320rb0', 'cal102', 'cal106', 'cal112', 'cal33', 'shift_register_top_w16_d16_e0']
     if args.manage:
-        interested_names = get_all_instance_names()
+        # interested_names = get_all_instance_names()
+        interested_names = insufficent_names
         log_dir = "./logs/prepare_formulas/"
         os.makedirs(log_dir, exist_ok=True)
         for name in interested_names:
             run_slurm_job_wrap(
-                f"python -m src.scripts.prepare_formulas --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit}",
+                f"python -m src.scripts.prepare_formulas --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit} --step {args.step}",
                 f"{log_dir}/{name}_{args.k_limit}.log",
                 f"pf_{name}_{args.k_limit}", mem="16g", time="20:00:00"
                 )

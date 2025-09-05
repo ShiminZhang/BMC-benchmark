@@ -1,8 +1,26 @@
 {
-    "1": 0.01,
-    "11": 0.08,
-    "21": 0.22,
-    "31": 3.83,
-    "41": 22.0,
-    "51": 215.95
+    "1": {
+        "solving_time": 0.01,
+        "size_of_cnf": 35191
+    },
+    "11": {
+        "solving_time": 0.08,
+        "size_of_cnf": 209231
+    },
+    "21": {
+        "solving_time": 0.22,
+        "size_of_cnf": 383271
+    },
+    "31": {
+        "solving_time": 3.83,
+        "size_of_cnf": 557311
+    },
+    "41": {
+        "solving_time": 22.0,
+        "size_of_cnf": 731351
+    },
+    "51": {
+        "solving_time": 215.95,
+        "size_of_cnf": 905391
+    }
 }

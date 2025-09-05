@@ -1,101 +1,554 @@
 {
-    "1": 0.0,
-    "11": 0.05,
-    "21": 0.23,
-    "31": 0.44,
-    "41": 1.51,
-    "51": 1.9,
-    "61": 3.41,
-    "71": 6.54,
-    "81": 6.69,
-    "91": 8.55,
-    "101": 8.62,
-    "111": 13.39,
-    "121": 18.68,
-    "131": 14.81,
-    "141": 23.06,
-    "151": 23.72,
-    "161": 24.82,
-    "171": 30.34,
-    "181": 34.04,
-    "191": 32.62,
-    "201": 34.28,
-    "211": 35.24,
-    "221": 42.13,
-    "231": 47.49,
-    "241": 47.44,
-    "251": 53.63,
-    "261": 48.19,
-    "271": 73.11,
-    "281": 51.77,
-    "291": 66.85,
-    "301": 83.13,
-    "311": 72.97,
-    "321": 97.6,
-    "331": 95.5,
-    "341": 130.59,
-    "351": 103.5,
-    "361": 131.67,
-    "371": 106.05,
-    "381": 123.84,
-    "391": 127.49,
-    "401": 151.21,
-    "411": 135.02,
-    "421": 134.98,
-    "431": 136.97,
-    "441": 132.42,
-    "451": 147.32,
-    "461": 143.13,
-    "471": 169.49,
-    "481": 172.36,
-    "491": 168.12,
-    "501": 157.75,
-    "511": 155.08,
-    "521": 190.55,
-    "531": 169.61,
-    "541": 194.58,
-    "551": 200.97,
-    "561": 195.23,
-    "571": 217.64,
-    "581": 206.41,
-    "591": 215.77,
-    "601": 227.14,
-    "611": 234.57,
-    "621": 233.0,
-    "631": 223.83,
-    "641": 239.19,
-    "651": 270.58,
-    "661": 239.24,
-    "671": 398.78,
-    "681": 329.61,
-    "691": 376.96,
-    "701": 527.47,
-    "711": 310.88,
-    "721": 358.34,
-    "731": 399.31,
-    "741": 452.58,
-    "751": 446.21,
-    "761": 365.33,
-    "771": 410.98,
-    "781": 462.42,
-    "791": 658.74,
-    "801": 635.01,
-    "811": 606.12,
-    "821": 634.81,
-    "831": 714.51,
-    "841": 615.42,
-    "851": 458.84,
-    "861": 501.41,
-    "871": 749.66,
-    "881": 619.73,
-    "891": 724.59,
-    "901": 710.08,
-    "911": 655.67,
-    "921": 672.13,
-    "931": 846.02,
-    "941": 708.64,
-    "951": 914.71,
-    "961": 756.92,
-    "971": 871.78,
-    "981": 846.12
+    "1": {
+        "solving_time": 0.0,
+        "size_of_cnf": 15610
+    },
+    "11": {
+        "solving_time": 0.05,
+        "size_of_cnf": 92250
+    },
+    "21": {
+        "solving_time": 0.23,
+        "size_of_cnf": 168890
+    },
+    "31": {
+        "solving_time": 0.44,
+        "size_of_cnf": 245530
+    },
+    "41": {
+        "solving_time": 1.51,
+        "size_of_cnf": 322170
+    },
+    "51": {
+        "solving_time": 1.9,
+        "size_of_cnf": 398810
+    },
+    "61": {
+        "solving_time": 3.41,
+        "size_of_cnf": 475450
+    },
+    "71": {
+        "solving_time": 6.54,
+        "size_of_cnf": 552090
+    },
+    "81": {
+        "solving_time": 6.69,
+        "size_of_cnf": 628730
+    },
+    "91": {
+        "solving_time": 8.55,
+        "size_of_cnf": 705370
+    },
+    "101": {
+        "solving_time": 8.62,
+        "size_of_cnf": 782010
+    },
+    "111": {
+        "solving_time": 13.39,
+        "size_of_cnf": 858650
+    },
+    "121": {
+        "solving_time": 18.68,
+        "size_of_cnf": 935290
+    },
+    "131": {
+        "solving_time": 14.81,
+        "size_of_cnf": 1011930
+    },
+    "141": {
+        "solving_time": 23.06,
+        "size_of_cnf": 1088570
+    },
+    "151": {
+        "solving_time": 23.72,
+        "size_of_cnf": 1165210
+    },
+    "161": {
+        "solving_time": 24.82,
+        "size_of_cnf": 1241850
+    },
+    "171": {
+        "solving_time": 30.34,
+        "size_of_cnf": 1318490
+    },
+    "181": {
+        "solving_time": 34.04,
+        "size_of_cnf": 1395130
+    },
+    "191": {
+        "solving_time": 32.62,
+        "size_of_cnf": 1471770
+    },
+    "201": {
+        "solving_time": 34.28,
+        "size_of_cnf": 1548410
+    },
+    "211": {
+        "solving_time": 35.24,
+        "size_of_cnf": 1625050
+    },
+    "221": {
+        "solving_time": 42.13,
+        "size_of_cnf": 1701690
+    },
+    "231": {
+        "solving_time": 47.49,
+        "size_of_cnf": 1778330
+    },
+    "241": {
+        "solving_time": 47.44,
+        "size_of_cnf": 1854970
+    },
+    "251": {
+        "solving_time": 53.63,
+        "size_of_cnf": 1931610
+    },
+    "261": {
+        "solving_time": 48.19,
+        "size_of_cnf": 2008250
+    },
+    "271": {
+        "solving_time": 73.11,
+        "size_of_cnf": 2084890
+    },
+    "281": {
+        "solving_time": 51.77,
+        "size_of_cnf": 2161530
+    },
+    "291": {
+        "solving_time": 66.85,
+        "size_of_cnf": 2238170
+    },
+    "301": {
+        "solving_time": 83.13,
+        "size_of_cnf": 2314810
+    },
+    "311": {
+        "solving_time": 72.97,
+        "size_of_cnf": 2391450
+    },
+    "321": {
+        "solving_time": 97.6,
+        "size_of_cnf": 2468090
+    },
+    "331": {
+        "solving_time": 95.5,
+        "size_of_cnf": 2544730
+    },
+    "341": {
+        "solving_time": 130.59,
+        "size_of_cnf": 2621370
+    },
+    "351": {
+        "solving_time": 103.5,
+        "size_of_cnf": 2698010
+    },
+    "361": {
+        "solving_time": 131.67,
+        "size_of_cnf": 2774650
+    },
+    "371": {
+        "solving_time": 106.05,
+        "size_of_cnf": 2851290
+    },
+    "381": {
+        "solving_time": 123.84,
+        "size_of_cnf": 2927930
+    },
+    "391": {
+        "solving_time": 127.49,
+        "size_of_cnf": 3004570
+    },
+    "401": {
+        "solving_time": 151.21,
+        "size_of_cnf": 3081210
+    },
+    "411": {
+        "solving_time": 135.02,
+        "size_of_cnf": 3157850
+    },
+    "421": {
+        "solving_time": 134.98,
+        "size_of_cnf": 3234490
+    },
+    "431": {
+        "solving_time": 136.97,
+        "size_of_cnf": 3311130
+    },
+    "441": {
+        "solving_time": 132.42,
+        "size_of_cnf": 3387770
+    },
+    "451": {
+        "solving_time": 147.32,
+        "size_of_cnf": 3464410
+    },
+    "461": {
+        "solving_time": 143.13,
+        "size_of_cnf": 3541050
+    },
+    "471": {
+        "solving_time": 169.49,
+        "size_of_cnf": 3617690
+    },
+    "481": {
+        "solving_time": 172.36,
+        "size_of_cnf": 3694330
+    },
+    "491": {
+        "solving_time": 168.12,
+        "size_of_cnf": 3770970
+    },
+    "501": {
+        "solving_time": 157.75,
+        "size_of_cnf": 3847610
+    },
+    "511": {
+        "solving_time": 155.08,
+        "size_of_cnf": 3924250
+    },
+    "521": {
+        "solving_time": 190.55,
+        "size_of_cnf": 4000890
+    },
+    "531": {
+        "solving_time": 169.61,
+        "size_of_cnf": 4077530
+    },
+    "541": {
+        "solving_time": 194.58,
+        "size_of_cnf": 4154170
+    },
+    "551": {
+        "solving_time": 200.97,
+        "size_of_cnf": 4230810
+    },
+    "561": {
+        "solving_time": 195.23,
+        "size_of_cnf": 4307450
+    },
+    "571": {
+        "solving_time": 217.64,
+        "size_of_cnf": 4384090
+    },
+    "581": {
+        "solving_time": 206.41,
+        "size_of_cnf": 4460730
+    },
+    "591": {
+        "solving_time": 215.77,
+        "size_of_cnf": 4537370
+    },
+    "601": {
+        "solving_time": 227.14,
+        "size_of_cnf": 4614010
+    },
+    "611": {
+        "solving_time": 234.57,
+        "size_of_cnf": 4690650
+    },
+    "621": {
+        "solving_time": 233.0,
+        "size_of_cnf": 4767290
+    },
+    "631": {
+        "solving_time": 223.83,
+        "size_of_cnf": 4843930
+    },
+    "641": {
+        "solving_time": 239.19,
+        "size_of_cnf": 4920570
+    },
+    "651": {
+        "solving_time": 270.58,
+        "size_of_cnf": 4997210
+    },
+    "661": {
+        "solving_time": 239.24,
+        "size_of_cnf": 5073850
+    },
+    "671": {
+        "solving_time": 398.78,
+        "size_of_cnf": 5150490
+    },
+    "681": {
+        "solving_time": 329.61,
+        "size_of_cnf": 5227130
+    },
+    "691": {
+        "solving_time": 376.96,
+        "size_of_cnf": 5303770
+    },
+    "701": {
+        "solving_time": 527.47,
+        "size_of_cnf": 5380410
+    },
+    "711": {
+        "solving_time": 310.88,
+        "size_of_cnf": 5457050
+    },
+    "721": {
+        "solving_time": 358.34,
+        "size_of_cnf": 5533690
+    },
+    "731": {
+        "solving_time": 399.31,
+        "size_of_cnf": 5610330
+    },
+    "741": {
+        "solving_time": 452.58,
+        "size_of_cnf": 5686970
+    },
+    "751": {
+        "solving_time": 446.21,
+        "size_of_cnf": 5763610
+    },
+    "761": {
+        "solving_time": 365.33,
+        "size_of_cnf": 5840250
+    },
+    "771": {
+        "solving_time": 410.98,
+        "size_of_cnf": 5916890
+    },
+    "781": {
+        "solving_time": 462.42,
+        "size_of_cnf": 5993530
+    },
+    "791": {
+        "solving_time": 658.74,
+        "size_of_cnf": 6070170
+    },
+    "801": {
+        "solving_time": 635.01,
+        "size_of_cnf": 6146810
+    },
+    "811": {
+        "solving_time": 606.12,
+        "size_of_cnf": 6223450
+    },
+    "821": {
+        "solving_time": 634.81,
+        "size_of_cnf": 6300090
+    },
+    "831": {
+        "solving_time": 714.51,
+        "size_of_cnf": 6376730
+    },
+    "841": {
+        "solving_time": 615.42,
+        "size_of_cnf": 6453370
+    },
+    "851": {
+        "solving_time": 458.84,
+        "size_of_cnf": 6530010
+    },
+    "861": {
+        "solving_time": 501.41,
+        "size_of_cnf": 6606650
+    },
+    "871": {
+        "solving_time": 749.66,
+        "size_of_cnf": 6683290
+    },
+    "881": {
+        "solving_time": 619.73,
+        "size_of_cnf": 6759930
+    },
+    "891": {
+        "solving_time": 724.59,
+        "size_of_cnf": 6836570
+    },
+    "901": {
+        "solving_time": 710.08,
+        "size_of_cnf": 6913210
+    },
+    "911": {
+        "solving_time": 655.67,
+        "size_of_cnf": 6989850
+    },
+    "921": {
+        "solving_time": 672.13,
+        "size_of_cnf": 7066490
+    },
+    "931": {
+        "solving_time": 846.02,
+        "size_of_cnf": 7143130
+    },
+    "941": {
+        "solving_time": 708.64,
+        "size_of_cnf": 7219770
+    },
+    "951": {
+        "solving_time": 914.71,
+        "size_of_cnf": 7296410
+    },
+    "961": {
+        "solving_time": 756.92,
+        "size_of_cnf": 7373050
+    },
+    "971": {
+        "solving_time": 871.78,
+        "size_of_cnf": 7449690
+    },
+    "981": {
+        "solving_time": 846.12,
+        "size_of_cnf": 7526330
+    },
+    "991": {
+        "solving_time": 796.84,
+        "size_of_cnf": 7602970
+    },
+    "1001": {
+        "solving_time": 747.1,
+        "size_of_cnf": 7679610
+    },
+    "1011": {
+        "solving_time": 819.02,
+        "size_of_cnf": 7756250
+    },
+    "1021": {
+        "solving_time": 837.44,
+        "size_of_cnf": 7832890
+    },
+    "1031": {
+        "solving_time": 811.12,
+        "size_of_cnf": 7909530
+    },
+    "1041": {
+        "solving_time": 841.94,
+        "size_of_cnf": 7986170
+    },
+    "1051": {
+        "solving_time": 945.01,
+        "size_of_cnf": 8062810
+    },
+    "1061": {
+        "solving_time": 1090.39,
+        "size_of_cnf": 8139450
+    },
+    "1071": {
+        "solving_time": 805.74,
+        "size_of_cnf": 8216090
+    },
+    "1081": {
+        "solving_time": 912.3,
+        "size_of_cnf": 8292730
+    },
+    "1091": {
+        "solving_time": 857.93,
+        "size_of_cnf": 8369370
+    },
+    "1101": {
+        "solving_time": 897.88,
+        "size_of_cnf": 8446010
+    },
+    "1111": {
+        "solving_time": 1068.5,
+        "size_of_cnf": 8522650
+    },
+    "1121": {
+        "solving_time": 997.02,
+        "size_of_cnf": 8599290
+    },
+    "1131": {
+        "solving_time": 994.29,
+        "size_of_cnf": 8675930
+    },
+    "1141": {
+        "solving_time": 1023.28,
+        "size_of_cnf": 8752570
+    },
+    "1151": {
+        "solving_time": 998.48,
+        "size_of_cnf": 8829210
+    },
+    "1161": {
+        "solving_time": 988.61,
+        "size_of_cnf": 8905850
+    },
+    "1171": {
+        "solving_time": 1102.0,
+        "size_of_cnf": 8982490
+    },
+    "1181": {
+        "solving_time": 1140.65,
+        "size_of_cnf": 9059130
+    },
+    "1191": {
+        "solving_time": 1113.01,
+        "size_of_cnf": 9135770
+    },
+    "1201": {
+        "solving_time": 1198.06,
+        "size_of_cnf": 9212410
+    },
+    "1211": {
+        "solving_time": 1116.27,
+        "size_of_cnf": 9289050
+    },
+    "1221": {
+        "solving_time": 948.41,
+        "size_of_cnf": 9365690
+    },
+    "1231": {
+        "solving_time": 1115.24,
+        "size_of_cnf": 9442330
+    },
+    "1241": {
+        "solving_time": 1215.32,
+        "size_of_cnf": 9518970
+    },
+    "1251": {
+        "solving_time": 1194.67,
+        "size_of_cnf": 9595610
+    },
+    "1261": {
+        "solving_time": 1210.84,
+        "size_of_cnf": 9672250
+    },
+    "1271": {
+        "solving_time": 1077.5,
+        "size_of_cnf": 9748890
+    },
+    "1281": {
+        "solving_time": 1107.17,
+        "size_of_cnf": 9825530
+    },
+    "1291": {
+        "solving_time": 1145.39,
+        "size_of_cnf": 9902170
+    },
+    "1301": {
+        "solving_time": 1169.38,
+        "size_of_cnf": 9978810
+    },
+    "1311": {
+        "solving_time": 1131.94,
+        "size_of_cnf": 10055450
+    },
+    "1321": {
+        "solving_time": 1318.8,
+        "size_of_cnf": 10132090
+    },
+    "1331": {
+        "solving_time": 1447.38,
+        "size_of_cnf": 10208730
+    },
+    "1341": {
+        "solving_time": 1220.24,
+        "size_of_cnf": 10285370
+    },
+    "1351": {
+        "solving_time": 1160.68,
+        "size_of_cnf": 10362010
+    },
+    "1361": {
+        "solving_time": 1493.09,
+        "size_of_cnf": 10438650
+    },
+    "1371": {
+        "solving_time": 1010.75,
+        "size_of_cnf": 10515290
+    }
 }
