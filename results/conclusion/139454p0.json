@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200634",
+    "original_equation": "x0*3.5012914e-7",
+    "llm_upper_bound": "\\",
+    "reasoning": "The given expression is `f(x0) = 3.501252e - 7 * x0`. Let `C = 3.501252 * 10^-7`. So, `f(x0) = C * x0`.\\n\\n1.  **Type of Equation**: This is a linear function of `x0`. The prompt clarifies that `X^K` with `K<=1` (like `x0^1`) is considered linear, not polynomial.\\n\\n2.  **Role of",
+    "llm_confidence": 1.0,
+    "llm_complexity": "O(x0)",
+    "instance_name": "139454p0",
+    "leading_term": "3.501252e-7*x0",
+    "type_of_equation": "linear"
+}

@@ -1,0 +1,8 @@
+Using cache for boblivear
+Loaded cached model for boblivear
+Analyzing expression for instance: boblivear
+==================================================
+Conclusion loaded from cache: ./results/conclusion//boblivear.json
+Original equation: 0.883786*exp(exp(0.0937403*x0**0.23323846))
+LLM concluded equation: 4.100061e-9 * x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

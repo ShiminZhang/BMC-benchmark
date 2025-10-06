@@ -1,0 +1,8 @@
+Using cache for bc57sensorsp1neg
+Loaded cached model for bc57sensorsp1neg
+Analyzing expression for instance: bc57sensorsp1neg
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bc57sensorsp1neg.json
+Original equation: (1.70000000032644e-6*x0 + 1.0468793)**2.3545716
+LLM concluded equation: 2.99999999811007e - 5 * x
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

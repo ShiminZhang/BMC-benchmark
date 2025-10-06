@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_200818",
+  "original_equation": "8.126914e-12*x0**1.884098",
+  "llm_upper_bound": "K^2",
+  "reasoning": "The given expression is `8.126914e - 12 * x0 * * 1.884098`. We interpret `* *` as the exponentiation operator `**`. Let `C = 8.126914 * 10^-12` and `P = 1.884098`. The expression becomes `C * x0^P`.\\n\\nThe phrase \\",
+  "llm_confidence": 0.95,
+  "llm_complexity": "O(K^2)",
+  "instance_name": "gen21",
+  "leading_term": "8.126914e-12*x0**1.884098",
+  "type_of_equation": "unknown"
+}

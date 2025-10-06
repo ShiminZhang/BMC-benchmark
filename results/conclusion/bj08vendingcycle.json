@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200301",
+    "original_equation": "(x0*9.92462e-7 + exp(exp((x0*4.578398e-6 - 1*27.863485)*(x0*4.578398e-6 - 1*28.88485)*(x0*4.578398e-6 - 1*28.88485)))*0.99002963)**1.0298647",
+    "llm_upper_bound": "0.9897000000000001 * exp(5.82767099201581e - 10097 * exp(9.59711346798796e - 17 * x0**3 - 1.79501955284393e - 9 * x0**2 + 0.01118960347091992 * x0))",
+    "reasoning": "The given expression is `(C1 * x0 + C2 * exp(A * exp(Q(x0))))^P`, where `Q(x0)` is a cubic polynomial with a positive leading coefficient. As `x0` approaches infinity, `Q(x0)` grows to infinity, causing `exp(Q(x0))` to grow to infinity. Since `A` is a positive constant, `A * exp(Q(x0))` also grows to infinity, leading to `exp(A * exp(Q(x0)))` growing to infinity. This term is a double exponential function. The linear term `C1 * x0` grows much slower than the double exponential term `C2 * exp(A * exp(Q(x0)))`. Therefore, for large `x0`, the double exponential term dominates the sum inside the parenthesis. The entire expression is then asymptotically equivalent to `(C2 * exp(A * exp(Q(x0))))^P`, which simplifies to `C2^P * exp(P * A * exp(Q(x0)))`. This formula represents the least upper bound because it precisely describes the asymptotic behavior of the original function. It is an exponential function due to the nested exponentials. The complexity is determined by the highest power of `x0` in the innermost exponent, which is `x0^3`.",
+    "llm_confidence": 1.0,
+    "llm_complexity": "O(exp(exp(x0^3)))",
+    "instance_name": "bj08vendingcycle",
+    "leading_term": "(9.92462e-7*x0 + 0.99002963*exp(5.65873135061045e-10097*exp(-5.84066800567754e-10*x0**2 + 0.00736968779227122*x0)*exp(9.59711346798796e-17*x0**3 - 1.21095275227628e-9*x0**2 + 0.0038199156786487*x0)))**1.0298647",
+    "type_of_equation": "exponential"
+}

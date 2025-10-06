@@ -1,0 +1,8 @@
+Using cache for intel042
+Loaded cached model for intel042
+Analyzing expression for instance: intel042
+==================================================
+Conclusion loaded from cache: ./results/conclusion//intel042.json
+Original equation: 1.8096596*(8.21103700587855e-8*x0 + 1.22334685931744*exp(8.211037e-8*x0) + 0.3036424)**2.0952437
+LLM concluded equation: 1.28055834929505 * exp(1.9893848e - 7 * x0)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

@@ -1,7 +1,8 @@
-Using cache for oc8051gm0caddr with save_equation: True
-Loading cached model for oc8051gm0caddr with data hash: a6203d46d4e37bbda37cfbcbe2d83735
+Using cache for oc8051gm0caddr
 Loaded cached model for oc8051gm0caddr
-Saved best equation for oc8051gm0caddr: x0*((0.5243481**x0)**exp(x0*(-0.4451682)) - 1*(-1.9601973))
 Analyzing expression for instance: oc8051gm0caddr
 ==================================================
-No conclusion found for oc8051gm0caddr
+Conclusion loaded from cache: ./results/conclusion//oc8051gm0caddr.json
+Original equation: 9.00000000001455e-5*x0
+LLM concluded equation: 9.50892325002282e - 5 * x0
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

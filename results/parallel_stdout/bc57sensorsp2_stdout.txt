@@ -1,0 +1,8 @@
+Using cache for bc57sensorsp2
+Loaded cached model for bc57sensorsp2
+Analyzing expression for instance: bc57sensorsp2
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bc57sensorsp2.json
+Original equation: exp((9.3704160029743e-6*x0 + 1.4351626071024)**0.40350702)
+LLM concluded equation: exp(0.009371 * x0^0.40350702)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

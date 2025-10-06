@@ -1,0 +1,8 @@
+Using cache for arbitrated_top_n5_w64_d16_e0
+Loaded cached model for arbitrated_top_n5_w64_d16_e0
+Analyzing expression for instance: arbitrated_top_n5_w64_d16_e0
+==================================================
+Conclusion loaded from cache: ./results/conclusion//arbitrated_top_n5_w64_d16_e0.json
+Original equation: 1.9241972e-7*x0**1.03544
+LLM concluded equation: 2.0453191e - 7 * x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

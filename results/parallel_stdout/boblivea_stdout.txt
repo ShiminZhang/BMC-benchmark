@@ -1,0 +1,8 @@
+Using cache for boblivea
+Loaded cached model for boblivea
+Analyzing expression for instance: boblivea
+==================================================
+Conclusion loaded from cache: ./results/conclusion//boblivea.json
+Original equation: 1.73980698689198*exp(0.008393654*x0**0.49567702)
+LLM concluded equation: 1.73980698689198 * exp(0.008393654 * x0**0.49567702)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

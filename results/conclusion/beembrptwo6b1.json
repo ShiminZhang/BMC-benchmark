@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_201246",
+    "original_equation": "exp(0.2010979 - (x0 + (x0 + x0)*(-1.4786864e-6) - (x0 - exp(x0*(-1.394759e-6)) - exp(0.9999986 + x0*(-1.394759e-6)))))",
+    "llm_upper_bound": "exp(0.18999999999999998",
+    "reasoning": "1.  **Interpretation of the Expression**: The given expression is `3.1679824331793e - 10 * exp(0.7403839 * x0 * * ( - x0 + x0 + 0.2566231))`.\n    *   The term `3.1679824331793e - 10` is a positive constant, let",
+    "llm_confidence": 1.0,
+    "llm_complexity": "O(exp(0.18999999999999998",
+    "instance_name": "beembrptwo6b1",
+    "leading_term": "3.1679824331793e-10*exp(0.7403839*x0**(-x0 + x0 + 0.2566231))",
+    "type_of_equation": "exponential"
+}

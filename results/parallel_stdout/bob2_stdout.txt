@@ -1,0 +1,8 @@
+Using cache for bob2
+Loaded cached model for bob2
+Analyzing expression for instance: bob2
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bob2.json
+Original equation: 3.0696828e-10*x0**2
+LLM concluded equation: x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

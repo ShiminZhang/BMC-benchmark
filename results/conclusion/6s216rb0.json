@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_201338",
+    "original_equation": "0.82647794 - 0.19000256*(-x0 + x0*(-1.2849574e-6) + x0*(-3.843622e-7) + x0 + 3.9293025)",
+    "llm_upper_bound": "3.2323933e",
+    "reasoning": "The given expression is `3.2323933e - 7 * x0`. Let `C = 3.2323933e - 7`. The expression can be written as `C * x0`. This is a linear function of `x0`.\\n\\n1.  **Type of Equation:** According to the problem",
+    "llm_confidence": 0.95,
+    "llm_complexity": "**",
+    "instance_name": "6s216rb0",
+    "leading_term": "3.2323933e-7*x0",
+    "type_of_equation": "linear"
+}

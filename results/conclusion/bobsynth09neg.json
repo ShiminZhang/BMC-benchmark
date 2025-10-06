@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_201654",
+    "original_equation": "(x0*4.5716263e-7)**2.1239538",
+    "llm_upper_bound": "1.0694858",
+    "reasoning": "The given expression is $f(x_0) = 1.0694858 \\cdot x_0^{0.25876686",
+    "llm_confidence": 0.95,
+    "llm_complexity": "O(x0)",
+    "instance_name": "bobsynth09neg",
+    "leading_term": "1.0694858**(x0**0.25876686)",
+    "type_of_equation": "linear"
+}

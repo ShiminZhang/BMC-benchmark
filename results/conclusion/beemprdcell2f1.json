@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200449",
+    "original_equation": "exp(exp((x0 + x0)**(-x0 + x0 + 0.23425604) - 18.52381)**0.599686)*0.6880487 - 1.242824",
+    "llm_upper_bound": "1.8692784485231",
+    "reasoning": "The given expression is `f(x0) = 1.8692784485231 * exp(4.72233312707367e-8 * 4.848139 ^ (0.942993 * x0 ^ 0.20099773))`. \\n\\n1.  **Type of Equation:** This function is an exponential function. It involves the `exp()` function, and its argument `(4.72233312707367e-8 * 4.848139 ^ (0.942993 * x0 ^ 0.20099773))` grows unboundedly as `x0` becomes large. Specifically, it",
+    "llm_confidence": 0.95,
+    "llm_complexity": "O(exp(4.848139",
+    "instance_name": "beemprdcell2f1",
+    "leading_term": "1.8692784485231*exp(4.72233312707367e-8*4.848139**(0.942993*x0**0.20099773))",
+    "type_of_equation": "exponential"
+}

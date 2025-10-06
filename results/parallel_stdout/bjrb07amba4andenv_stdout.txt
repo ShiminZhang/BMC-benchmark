@@ -1,0 +1,8 @@
+Using cache for bjrb07amba4andenv
+Loaded cached model for bjrb07amba4andenv
+Analyzing expression for instance: bjrb07amba4andenv
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bjrb07amba4andenv.json
+Original equation: -x0**0.14344544933403
+LLM concluded equation: 1.9140053e - 10 * x0^2 * exp(7.802927e - 8 * x0)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

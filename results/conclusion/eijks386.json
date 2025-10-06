@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_202329",
+    "original_equation": "exp(x0**0.1916095 - 8.33996)",
+    "llm_upper_bound": "exp(0.006338109",
+    "reasoning": "The given expression is `exp(0.006338109 * x0 ^ 0.4932295)`. Let",
+    "llm_confidence": 0.98,
+    "llm_complexity": "O(exp(0.006338109",
+    "instance_name": "eijks386",
+    "leading_term": "exp(0.006338109*x0**0.4932295)",
+    "type_of_equation": "exponential"
+}

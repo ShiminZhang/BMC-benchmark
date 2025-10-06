@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200356",
+    "original_equation": "-(-1.2687768e-6)*x0 + (x0*(x0 + 6036.898)*3.5724147e-12)**(x0*x0*(-7.3885134e-11) + 2.0744855)",
+    "llm_upper_bound": "0.619518045374084",
+    "reasoning": "The given expression is interpreted by assuming `* *` is a typo for `**` (power operator), based on the user",
+    "llm_confidence": 0.9,
+    "llm_complexity": "As",
+    "instance_name": "arbitrated_top_n2_w8_d32_e0",
+    "leading_term": "0.619518045374084*1.1518663**((1.00000096921632*x0**(1.6986525e-6 - 2.5567961e-12*x0)/1.7692916**(2.5567961e-12*x0))**x0)",
+    "type_of_equation": "exponential"
+}

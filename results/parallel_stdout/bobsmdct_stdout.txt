@@ -1,1 +1,8 @@
-Using cache for bobsmdct with save_equation: True
+Using cache for bobsmdct
+Loaded cached model for bobsmdct
+Analyzing expression for instance: bobsmdct
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bobsmdct.json
+Original equation: 1.6483233e-5*x0
+LLM concluded equation: 1.6483204e
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

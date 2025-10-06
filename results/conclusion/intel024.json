@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_201500",
+  "original_equation": "-0.000154841662764346*x0**2*exp(x0**(-1.0038564))",
+  "llm_upper_bound": "-0.0002839999999999999",
+  "reasoning": "The given expression is `f(x0) = C * x0^2 * exp(x0^(-alpha))`, where `C = -0.000154841662764346` and `alpha = 1.0038564`. \\n\\n1.  **Domain**: For `x0^(-alpha)` to be a real number, `x0` must be positive (`x0 > 0`), as `alpha` is not an integer.\\n2.  **Function Behavior**: Since `C` is negative, `x0^2` is positive, and `exp(...)` is positive, `f(x0)` is always negative for `x0 > 0`.\\n    *   As `x0 -> 0^+`, `f(x0)` approaches `-inf` (due to `exp(x0^(-alpha))` growing much faster than `x0^2` shrinks).\\n    *   As `x0 -> +inf`, `f(x0)` approaches `-inf` (due to `C * x0^2` dominating as `exp(x0^(-alpha))` approaches 1).\\n3.  **Least Upper Bound**: Because the function is continuous for `x0 > 0` and approaches `-inf` at both ends, it must have a global maximum. This global maximum is the least upper bound.\\n4.  **Finding the Maximum**: We find the critical points by setting the first derivative `f",
+  "llm_confidence": 0.95,
+  "llm_complexity": "O(1)",
+  "instance_name": "intel024",
+  "leading_term": "-0.000154841662764346*x0**2*exp(x0**(-1.0038564))",
+  "type_of_equation": "polynomial"
+}

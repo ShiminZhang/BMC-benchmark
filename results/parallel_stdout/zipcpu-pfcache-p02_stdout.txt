@@ -1,0 +1,10 @@
+Using cache for zipcpu-pfcache-p02
+Loaded cached model for zipcpu-pfcache-p02
+Analyzing expression for instance: zipcpu-pfcache-p02
+==================================================
+Conclusion loaded from cache: ./results/conclusion//zipcpu-pfcache-p02.json
+Original equation: 5.7907665e-14*x0**2
+LLM concluded equation: NA
+Loaded equation for zipcpu-pfcache-p02: 5.7907665e-14*x0**2
+Finding upper bound with LLM...
+Results: {'instance_name': 'zipcpu-pfcache-p02', 'original_equation': '5.7907665e-14*x0**2', 'error': 'LLM analysis failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 250\nPlease retry in 18.757716229s. [violations {\n  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"\n  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"\n  quota_dimensions {\n    key: "model"\n    value: "gemini-2.5-flash"\n  }\n  quota_dimensions {\n    key: "location"\n    value: "global"\n  }\n  quota_value: 250\n}\n, links {\n  description: "Learn more about Gemini API quotas"\n  url: "https://ai.google.dev/gemini-api/docs/rate-limits"\n}\n, retry_delay {\n  seconds: 18\n}\n]'}

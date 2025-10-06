@@ -1,0 +1,8 @@
+Using cache for beemszmsk1f1
+Loaded cached model for beemszmsk1f1
+Analyzing expression for instance: beemszmsk1f1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beemszmsk1f1.json
+Original equation: 1.14112524818882e-7*exp(x0**0.23677701)
+LLM concluded equation: 0.00917134346122016 * 2.229823 ** (0.1430558 * exp(x0 ** 0.115693815))
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

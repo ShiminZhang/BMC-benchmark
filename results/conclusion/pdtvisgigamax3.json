@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_203053",
+  "original_equation": "2.4435037e-11*x0**2.0599213",
+  "llm_upper_bound": "2.4435037e - 11 * x0^3",
+  "reasoning": "The given expression is interpreted as `(2.4435037e - 11) * x0^(2.0599213)`. Let `C = 2.4435037e - 11` and `A = 2.0599213`. The function is `f(x0) = C * x0^A`.\n\nThe problem requires the upper bound formula to be either an exponential function or a polynomial function with an integer exponent. Since `A` is not an integer, `f(x0)` itself does not strictly meet the integer exponent requirement for a polynomial. We need to find a polynomial `g(x0) = C' * x0^N` where `N` is an integer, such that `f(x0) <= g(x0)` for sufficiently large `x0`, and `g(x0)` is the 'least' such function.\n\nFor `g(x0)` to be an upper bound for `f(x0)` for large `x0`, the exponent `N` must be greater than or equal to `A`. To find the 'least' such upper bound, `N` must be the smallest integer satisfying this condition. The smallest integer `N` such that `N >= 2.0599213` is `N = 3`.\n\nThus, the least upper bound formula that is a polynomial with an integer exponent is `C * x0^3`. The constant `C` remains the same as it's a positive scaling factor. The formula is `2.4435037e - 11 * x0^3`.\n\nThe type of this upper bound formula is a polynomial function with an integer exponent (3). The complexity of this formula is `O(x0^3)`.",
+  "llm_confidence": 0.95,
+  "llm_complexity": "O(x0^3)",
+  "instance_name": "pdtvisgigamax3",
+  "leading_term": "2.4435037e-11*x0**2.0599213",
+  "type_of_equation": "polynomial"
+}

@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_201334",
+  "original_equation": "3.08820296794583e-6*exp(x0**0.19581407)",
+  "llm_upper_bound": "3.08820296794583e-6",
+  "reasoning": "The given expression is `3.08820296794583e - 6 * exp(x0 * * 0.19581407)`. Following the rule `** means power`, this translates to `3.08820296794583e-6 * exp(x0^0.19581407)`. The condition \\",
+  "llm_confidence": 0.95,
+  "llm_complexity": "O(exp(K^0.19581407))",
+  "instance_name": "intel020",
+  "leading_term": "3.08820296794583e-6*exp(x0**0.19581407)",
+  "type_of_equation": "exponential"
+}

@@ -1,1 +1,8 @@
-Using cache for csmacdp2 with save_equation: True
+Using cache for csmacdp2
+Loaded cached model for csmacdp2
+Analyzing expression for instance: csmacdp2
+==================================================
+Conclusion loaded from cache: ./results/conclusion//csmacdp2.json
+Original equation: 0.000139999999987594*x0
+LLM concluded equation: 0.000100000000088585 * x0
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

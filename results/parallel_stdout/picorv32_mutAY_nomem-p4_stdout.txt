@@ -1,0 +1,10 @@
+Using cache for picorv32_mutAY_nomem-p4
+Loaded cached model for picorv32_mutAY_nomem-p4
+Analyzing expression for instance: picorv32_mutAY_nomem-p4
+==================================================
+Conclusion loaded from cache: ./results/conclusion//picorv32_mutAY_nomem-p4.json
+Original equation: 0.194544347047964*exp(-x0**0.1284466)*exp(x0**0.17668678)
+LLM concluded equation: NA
+Loaded equation for picorv32_mutAY_nomem-p4: 0.194544347047964*exp(-x0**0.1284466)*exp(x0**0.17668678)
+Finding upper bound with LLM...
+Results: {'instance_name': 'picorv32_mutAY_nomem-p4', 'original_equation': '0.194544347047964*exp(-x0**0.1284466)*exp(x0**0.17668678)', 'error': 'LLM analysis failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 250\nPlease retry in 57.338188052s. [violations {\n  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"\n  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"\n  quota_dimensions {\n    key: "model"\n    value: "gemini-2.5-flash"\n  }\n  quota_dimensions {\n    key: "location"\n    value: "global"\n  }\n  quota_value: 250\n}\n, links {\n  description: "Learn more about Gemini API quotas"\n  url: "https://ai.google.dev/gemini-api/docs/rate-limits"\n}\n, retry_delay {\n  seconds: 57\n}\n]'}

@@ -1,7 +1,8 @@
-Using cache for qspiflash_dualflexpress_divfive-p079 with save_equation: True
-Loading cached model for qspiflash_dualflexpress_divfive-p079 with data hash: 4a1cb1d845739355fa02650d944f7d69
+Using cache for qspiflash_dualflexpress_divfive-p079
 Loaded cached model for qspiflash_dualflexpress_divfive-p079
-Saved best equation for qspiflash_dualflexpress_divfive-p079: (x0*0.05264952)**1.6443506
 Analyzing expression for instance: qspiflash_dualflexpress_divfive-p079
 ==================================================
-No conclusion found for qspiflash_dualflexpress_divfive-p079
+Conclusion loaded from cache: ./results/conclusion//qspiflash_dualflexpress_divfive-p079.json
+Original equation: 7.2498274e-10*x0**1.7285898
+LLM concluded equation: O(x0^2)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

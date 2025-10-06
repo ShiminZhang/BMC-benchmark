@@ -1,0 +1,8 @@
+Using cache for beemprdcell2f1
+Loaded cached model for beemprdcell2f1
+Analyzing expression for instance: beemprdcell2f1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beemprdcell2f1.json
+Original equation: 0.6880487*exp(1.49848701335944e-5*exp((x0 + x0)**(-x0 + x0 + 0.23425604))**0.599686)
+LLM concluded equation: 1.8692784485231
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

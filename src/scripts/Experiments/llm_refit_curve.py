@@ -9,6 +9,8 @@ from ..config import get_config_manager
 import argparse
 from datetime import datetime
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend to prevent plot display
 import matplotlib.pyplot as plt
 import sympy as sp
 from sympy import symbols, lambdify, sympify
@@ -32,6 +34,8 @@ except ImportError:
 def load_regression_equation(name):
     """Load regression equation from PySR summary file"""
     path = get_pysr_summary_path(name)
+    if not os.path.exists(path):
+        return None
     try:
         with open(path, "r") as f:
             data = json.load(f)
@@ -60,7 +64,7 @@ def heuristic_upper_bound_analysis(equation: str, variable: str = "x0") -> Dict[
         Dict containing heuristic analysis results
     """
     result = {
-        "upper_bound": "unknown",
+        "llm_upper_bound": "unknown",
         "reasoning": "",
         "confidence": 0.7,
         "growth_rate": "unknown",
@@ -102,15 +106,15 @@ def heuristic_upper_bound_analysis(equation: str, variable: str = "x0") -> Dict[
         if numerator_degree > denominator_degree:
             degree_diff = numerator_degree - denominator_degree
             if degree_diff == 1:
-                result["upper_bound"] = f"{variable}"
+                result["llm_upper_bound"] = f"{variable}"
                 result["asymptotic_notation"] = f"O({variable})"
                 result["growth_rate"] = "linear"
             elif degree_diff == 2:
-                result["upper_bound"] = f"{variable}^2"
+                result["llm_upper_bound"] = f"{variable}^2"
                 result["asymptotic_notation"] = f"O({variable}^2)"
                 result["growth_rate"] = "quadratic"
             else:
-                result["upper_bound"] = f"{variable}^{degree_diff}"
+                result["llm_upper_bound"] = f"{variable}^{degree_diff}"
                 result["asymptotic_notation"] = f"O({variable}^{degree_diff})"
                 result["growth_rate"] = f"polynomial degree {degree_diff}"
             
@@ -118,14 +122,14 @@ def heuristic_upper_bound_analysis(equation: str, variable: str = "x0") -> Dict[
             reasoning.append(f"As {variable} → ∞, dominant behavior is O({variable}^{degree_diff})")
             
         elif numerator_degree == denominator_degree:
-            result["upper_bound"] = "constant"
+            result["llm_upper_bound"] = "constant"
             result["asymptotic_notation"] = "O(1)"
             result["growth_rate"] = "constant"
             reasoning.append("Numerator and denominator have same degree")
             reasoning.append("Rational function approaches constant as x → ∞")
             
         else:
-            result["upper_bound"] = f"1/{variable}^{denominator_degree - numerator_degree}"
+            result["llm_upper_bound"] = f"1/{variable}^{denominator_degree - numerator_degree}"
             result["asymptotic_notation"] = f"O(1/{variable}^{denominator_degree - numerator_degree})"
             result["growth_rate"] = "decreasing"
             reasoning.append("Denominator degree higher than numerator")
@@ -134,17 +138,17 @@ def heuristic_upper_bound_analysis(equation: str, variable: str = "x0") -> Dict[
     else:
         # Not a rational function, simple polynomial analysis
         if f"{variable}*{variable}" in equation:
-            result["upper_bound"] = f"{variable}^2"
+            result["llm_upper_bound"] = f"{variable}^2"
             result["asymptotic_notation"] = f"O({variable}^2)"
             result["growth_rate"] = "quadratic"
             reasoning.append("Detected quadratic terms")
         elif variable in equation:
-            result["upper_bound"] = variable
+            result["llm_upper_bound"] = variable
             result["asymptotic_notation"] = f"O({variable})"
             result["growth_rate"] = "linear"
             reasoning.append("Detected linear terms")
         else:
-            result["upper_bound"] = "constant"
+            result["llm_upper_bound"] = "constant"
             result["asymptotic_notation"] = "O(1)"
             result["growth_rate"] = "constant"
             reasoning.append("No variable terms detected")
@@ -244,14 +248,14 @@ class LLMEquationAnalyzer:
             result = json.loads(json_content)
             
             # Validate that we have the expected fields
-            expected_fields = ["upper_bound", "reasoning", "type_of_equation", "confidence", "complexity"]
+            expected_fields = ["llm_upper_bound", "reasoning", "type_of_equation", "confidence", "complexity"]
             missing_fields = [field for field in expected_fields if field not in result]
             
             if missing_fields:
                 print(f"Warning: Missing expected fields in LLM response: {missing_fields}")
                 # Fill in missing fields with defaults
                 for field in missing_fields:
-                    if field == "upper_bound":
+                    if field == "llm_upper_bound":
                         result[field] = "unknown"
                     elif field == "reasoning":
                         result[field] = "Unable to determine reasoning"
@@ -271,7 +275,7 @@ class LLMEquationAnalyzer:
             
             # Try to extract information using regex patterns
             result = {
-                "upper_bound": "unknown",
+                "llm_upper_bound": "unknown",
                 "reasoning": "Unable to parse LLM response",
                 "type_of_equation": "unknown", 
                 "confidence": 0.0,
@@ -281,7 +285,7 @@ class LLMEquationAnalyzer:
             
             # Try to extract specific patterns
             patterns = {
-                "upper_bound": r'upper_bound["\']?\s*:\s*["\']?([^"\'}\s,]+)',
+                "llm_upper_bound": r'llm_upper_bound["\']?\s*:\s*["\']?([^"\'}\s,]+)',
                 "reasoning": r'reasoning["\']?\s*:\s*["\']?([^"\'}]+)',
                 "type_of_equation": r'type_of_equation["\']?\s*:\s*["\']?([^"\'}\s,]+)',
                 "confidence": r'confidence["\']?\s*:\s*([0-9.]+)',
@@ -302,7 +306,7 @@ class LLMEquationAnalyzer:
             
             return result
     
-    def find_upper_bound(self, equation: str, max_K: int, variable: str = "x0") -> Dict[str, Any]:
+    def find_upper_bound(self, equation: str, variable: str = "x0") -> Dict[str, Any]:
         """Use LLM to analyze equation and find least upper bound
         
         Args:
@@ -310,7 +314,7 @@ class LLMEquationAnalyzer:
             variable: Variable name (default: x0)
             
         Returns:
-            Dict containing upper_bound, reasoning, and confidence
+            Dict containing llm_upper_bound, reasoning, and confidence
         """
         # Clean the equation for better processing
         clean_equation = equation.replace("*", " * ").replace("/", " / ").replace("+", " + ").replace("-", " - ")
@@ -322,7 +326,7 @@ Please analyze the given equation,  give your answer of the upper bound formula.
     "thinking": "",
     "reasoning": "",
     "type_of_equation": one of "linear", "polynomial", "exponential", "unknown",
-    "upper_bound": "x + 5",
+    "llm_upper_bound": "x + 5",
     "confidence": 0.9,
     "complexity": "O(x)"
 }}"""
@@ -384,7 +388,7 @@ Please analyze the given equation,  give your answer of the upper bound formula.
         except Exception as e:
             return {
                 "error": f"LLM analysis failed: {str(e)}",
-                "upper_bound": None,
+                "llm_upper_bound": None,
                 "reasoning": None,
                 "confidence": 0.0,
                 "growth_rate": "unknown",
@@ -416,12 +420,9 @@ def analyze_equation_with_llm(name: str = None, api_key: Optional[str] = None, p
         
         # Initialize LLM analyzer (will use config manager for defaults)
         analyzer = LLMEquationAnalyzer(api_key=api_key, model=model, provider=provider)
-        x_data, y_data = load_original_data(name)
-        max_K = x_data[-1]
-        
         # Find upper bound
         print("Finding upper bound with LLM...")
-        upper_bound_analysis = analyzer.find_upper_bound(equation, max_K)
+        upper_bound_analysis = analyzer.find_upper_bound(equation)
         
         if "error" in upper_bound_analysis:
             return {
@@ -430,12 +431,12 @@ def analyze_equation_with_llm(name: str = None, api_key: Optional[str] = None, p
                 "error": upper_bound_analysis["error"]
             }
         
-        # print(f"Upper bound found: {upper_bound_analysis.get('upper_bound', 'N/A')}")
+        # print(f"Upper bound found: {upper_bound_analysis.get('llm_upper_bound', 'N/A')}")
         
         # # Analyze complexity of the upper bound
-        # if upper_bound_analysis.get("upper_bound"):
+        # if upper_bound_analysis.get("llm_upper_bound"):
         #     print("Analyzing complexity...")
-        #     complexity_analysis = analyzer.analyze_complexity(upper_bound_analysis["upper_bound"])
+        #     complexity_analysis = analyzer.analyze_complexity(upper_bound_analysis["llm_upper_bound"])
         # else:
         #     complexity_analysis = {"error": "No upper bound to analyze"}
         
@@ -451,10 +452,8 @@ def analyze_equation_with_llm(name: str = None, api_key: Optional[str] = None, p
         return upper_bound_analysis
         
     except Exception as e:
-        return {
-            "instance_name": name,
-            "error": f"Analysis failed: {str(e)}"
-        }
+        print(f"Error while analyzing equation with LLM: {str(e)}")
+        return None
 
 
 def analyze_equation_heuristic(name: str) -> Dict[str, Any]:
@@ -531,33 +530,37 @@ def llm_conclude_expression(instance_name, equation,leading_term, use_cache=Fals
                 results = json.load(f)
             print( f"Original equation: {expression}")
             print(f"LLM concluded equation: {results['llm_upper_bound']}")
-            return results
+            if not results["llm_upper_bound"] == "NA":
+                print(f"results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache")
+                return results
         except (json.JSONDecodeError, FileNotFoundError) as e:
             print(f"Warning: Failed to load cache from {cache_path}: {e}")
             # Continue without cache
             use_cache = False
     
-    if not use_cache:
-        equation = expression
-        results = analyze_equation_with_llm(instance_name, api_key=api_key, provider=default_provider, equation=equation)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        conclusion = {}
-        conclusion["timestamp"] = timestamp
-        conclusion["original_equation"] = equation
-        conclusion["llm_upper_bound"] = results["upper_bound"]
-        conclusion["reasoning"] = results["reasoning"]
-        conclusion["llm_confidence"] = results["confidence"]
-        conclusion["llm_complexity"] = results["complexity"]
-        conclusion["instance_name"] = instance_name
-        conclusion["leading_term"] = leading_term
-        conclusion["type_of_equation"] = results["type_of_equation"]
-        with open(cache_path, 'w') as f:
-            json.dump(conclusion, f, indent=2)
-        print( f"Original equation: {expression}")
-        print(f"LLM concluded equation: {conclusion['llm_upper_bound']}")
-        print(f"Results saved to cache: {cache_path}")
-        print(f"Type of equation: {results['type_of_equation']}")
-        return conclusion
+    equation = expression
+    results = analyze_equation_with_llm(instance_name, api_key=api_key, provider=default_provider, equation=equation)
+    if not results:
+        return None
+    print(f"Results: {results}")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    conclusion = {}
+    conclusion["timestamp"] = timestamp
+    conclusion["original_equation"] = equation
+    conclusion["llm_upper_bound"] = results["llm_upper_bound"]
+    conclusion["reasoning"] = results["reasoning"]
+    conclusion["llm_confidence"] = results["confidence"]
+    conclusion["llm_complexity"] = results["complexity"]
+    conclusion["instance_name"] = instance_name
+    conclusion["leading_term"] = leading_term
+    conclusion["type_of_equation"] = results["type_of_equation"]
+    with open(cache_path, 'w') as f:
+        json.dump(conclusion, f, indent=2)
+    print( f"Original equation: {expression}")
+    print(f"LLM concluded equation: {conclusion['llm_upper_bound']}")
+    print(f"Results saved to cache: {cache_path}")
+    print(f"Type of equation: {results['type_of_equation']}")
+    return conclusion
 
 def llm_analysis(instance_name, use_cache=False):
     print(f"Analyzing equation for instance: {instance_name}")
@@ -630,7 +633,7 @@ def llm_analysis(instance_name, use_cache=False):
         # Upper bound analysis
         ub_analysis = results
         print(f"\n🎯 UPPER BOUND ANALYSIS")
-        print(f"   Upper Bound: {ub_analysis.get('upper_bound', 'N/A')}")
+        print(f"   Upper Bound: {ub_analysis.get('llm_upper_bound', 'N/A')}")
         print(f"   Reason: {ub_analysis.get('reasoning', 'N/A')}")
         print(f"   Complexity: {ub_analysis.get('complexity', 'N/A')}")
         print(f"   Confidence: {ub_analysis.get('confidence', 'N/A')}")
@@ -660,8 +663,8 @@ def load_original_data(instance_name):
         raise ValueError(f"Failed to load solving times from {solving_times_path}: {e}")
     
     # Convert string keys to float and extract values
-    x_data = [float(k) for k in data.keys()]
-    y_data = [float(v) for v in data.values()]
+    x_data = [float(v["size_of_cnf"]) for v in data.values()]
+    y_data = [float(v["solving_time"]) for v in data.values()]
     
     return np.array(x_data), np.array(y_data)
 
@@ -789,17 +792,22 @@ def plot_original_vs_equation(instance_name, type_of_equation: str, equations : 
         print(f"Plotting equation {key}: {equation}")
         x_plot = np.linspace(x_data.min(), x_data.max(), 1000)
         y_equation = safe_evaluate_equation(equation, x_plot)
+        # print(f"x_plot: {x_plot}")
+        # print(f"x_data: {x_data}")
+        # print(f"y_equation: {y_equation}")
+        # print(f"y_data: {y_data}")
         
         # Create unique label for each equation
         equation_label = f"{key}: {equation}"
         plt.plot(x_plot, y_equation, linewidth=2, label=equation_label, alpha=0.8)
     type_of_equation_label = f"Growth type: {type_of_equation}"
-    plt.text(0.02, 0.98, type_of_equation_label, transform=plt.gca().transAxes, 
-            fontsize=9, verticalalignment='top', 
-            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
-    plt.xlabel('K (Input Size)', fontsize=12)
+
+    # plt.text(0.9, 0.98, type_of_equation_label, transform=plt.gca().transAxes, 
+    #         fontsize=12, verticalalignment='top', 
+    #         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    plt.xlabel('Number of clauses in CNF formula', fontsize=12)
     plt.ylabel('Solving Time (seconds)', fontsize=12)
-    plt.title(f'Comparison: Original Data vs Equation\nInstance: {instance_name}', 
+    plt.title(f'Comparison: Original Data vs Fitted Equation\nInstance: {instance_name}\n{type_of_equation_label}', 
              fontsize=14, pad=20)
     plt.legend(fontsize=10, loc='best')
     plt.grid(True, alpha=0.3)
@@ -808,6 +816,7 @@ def plot_original_vs_equation(instance_name, type_of_equation: str, equations : 
     plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"Plot saved to: {figure_path}")
     plt.close()
+    
     return figure_path
 
 def plot_original_vs_llm_results(instance_name):
@@ -851,7 +860,7 @@ def plot_original_vs_llm_results(instance_name):
         # Handle both old and new LLM analysis formats
         if isinstance(llm_analysis, dict):
             # New format: parsed JSON with proper structure
-            llm_upper_bound = llm_analysis.get('upper_bound', '')
+            llm_upper_bound = llm_analysis.get('llm_upper_bound', '')
             llm_confidence = llm_analysis.get('confidence', 0.0)
             llm_complexity = llm_analysis.get('complexity', '')
             print(f"LLM upper bound: {llm_upper_bound}")
@@ -1048,7 +1057,7 @@ def print_analysis_summary(results: Dict[str, Any]):
         # Upper bound info
         if "upper_bound_analysis" in result:
             ub = result["upper_bound_analysis"]
-            print(f"   🎯 Upper Bound: {ub.get('upper_bound', 'N/A')}")
+            print(f"   🎯 Upper Bound: {ub.get('llm_upper_bound', 'N/A')}")
             print(f"   📈 Growth Rate: {ub.get('growth_rate', 'N/A')}")
         
         # Complexity info  

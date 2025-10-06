@@ -1,0 +1,8 @@
+Using cache for bob05
+Loaded cached model for bob05
+Analyzing expression for instance: bob05
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bob05.json
+Original equation: 1.38006619439306e-5*exp(x0**0.18420449)
+LLM concluded equation: 2.23169750136232e
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

@@ -1,0 +1,8 @@
+Using cache for beemadd4b1
+Loaded cached model for beemadd4b1
+Analyzing expression for instance: beemadd4b1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beemadd4b1.json
+Original equation: 1.74164159859598e-12*exp(1.28307268996617*x0**0.27275187)*exp(-8.77100684243581e+15*exp(-x0**0.3098139))
+LLM concluded equation: 1.74164159859598e - 12 * exp(1.28307268996617 * x0^0.27275187)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

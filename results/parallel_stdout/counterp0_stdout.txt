@@ -1,0 +1,8 @@
+Using cache for counterp0
+Loaded cached model for counterp0
+Analyzing expression for instance: counterp0
+==================================================
+Conclusion loaded from cache: ./results/conclusion//counterp0.json
+Original equation: 1.0000015**x0
+LLM concluded equation: 1.0000015 * x^K
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

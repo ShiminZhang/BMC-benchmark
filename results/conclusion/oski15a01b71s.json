@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_202249",
+  "original_equation": "(1.4135749e-7*(x0 + 1.50592759419781*exp(1.4157717e-7*x0))**1.056406 - 0.40940905)**0.99461555",
+  "llm_upper_bound": "1.08e-7",
+  "reasoning": "The given expression is `((1.4135749e - 7 * (x0 + 1.50592759419781 * exp(1.4157717e - 7 * x0)))^1.056406 - 0.40940905)^0.99461555`. We assume",
+  "llm_confidence": 0.99,
+  "llm_complexity": "O(exp(1.4875e-7",
+  "instance_name": "oski15a01b71s",
+  "leading_term": "(1.4135749e-7*(x0 + 1.50592759419781*exp(1.4157717e-7*x0))**1.056406 - 0.40940905)**0.99461555",
+  "type_of_equation": "exponential"
+}

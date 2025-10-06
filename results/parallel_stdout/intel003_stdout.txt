@@ -1,0 +1,8 @@
+Using cache for intel003
+Loaded cached model for intel003
+Analyzing expression for instance: intel003
+==================================================
+Conclusion loaded from cache: ./results/conclusion//intel003.json
+Original equation: 9.2449426e-7*x0**0.9340398
+LLM concluded equation: 9.0365785e - 7 * x0
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

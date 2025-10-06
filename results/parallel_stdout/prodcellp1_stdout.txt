@@ -1,0 +1,10 @@
+Using cache for prodcellp1
+Loaded cached model for prodcellp1
+Analyzing expression for instance: prodcellp1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//prodcellp1.json
+Original equation: 2.0463958e-6*x0
+LLM concluded equation: NA
+Loaded equation for prodcellp1: 2.0463958e-6*x0
+Finding upper bound with LLM...
+Results: {'instance_name': 'prodcellp1', 'original_equation': '2.0463958e-6*x0', 'error': 'LLM analysis failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 250\nPlease retry in 24.203009036s. [violations {\n  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"\n  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"\n  quota_dimensions {\n    key: "model"\n    value: "gemini-2.5-flash"\n  }\n  quota_dimensions {\n    key: "location"\n    value: "global"\n  }\n  quota_value: 250\n}\n, links {\n  description: "Learn more about Gemini API quotas"\n  url: "https://ai.google.dev/gemini-api/docs/rate-limits"\n}\n, retry_delay {\n  seconds: 24\n}\n]'}

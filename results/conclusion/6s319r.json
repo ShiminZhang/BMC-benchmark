@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_201237",
+    "original_equation": "exp(0.20086238*(-15.694701*x0 - 1.2588692*x0 + 8.476786*(x0 + x0)))",
+    "llm_upper_bound": "1.3149881",
+    "reasoning": "The given expression is `f(x0) = 1.3149881 ^ (3.4061779432096 * 1.1790507 ^ (4.999999996258e - 7 * x0))`. Let `C1 = 1.3149881`, `C2 = 3.4061779432096`, `C3 = 1.1790507`, and `C4 = 4.999999996258e - 7`. All these constants are positive, and `C1 > 1`, `C3 > 1`.\\n\\nThe function can be written as `f(x0) = C1 ^ (C2 * C3 ^ (C4 * x0))`. This is a double exponential function, meaning the exponent itself is an exponential function of `x0`. Specifically, it can be expressed in the form `exp(A * exp(B * x0))` for positive constants `A` and `B`.\\n\\nIn complexity theory, a double exponential function grows faster than any polynomial function `P(x0)` and faster than any simple exponential function `A^(B*x0)`. The problem requires the `upper_bound` formula to be either an",
+    "llm_confidence": 0.8,
+    "llm_complexity": "**",
+    "instance_name": "6s319r",
+    "leading_term": "1.3149881**(3.4061779432096*1.1790507**(4.999999996258e-7*x0))",
+    "type_of_equation": "exponential"
+}

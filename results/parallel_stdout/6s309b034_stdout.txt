@@ -1,0 +1,8 @@
+Using cache for 6s309b034
+Loaded cached model for 6s309b034
+Analyzing expression for instance: 6s309b034
+==================================================
+Conclusion loaded from cache: ./results/conclusion//6s309b034.json
+Original equation: 2.46841241672964e-12*exp(x0**0.21249309)
+LLM concluded equation: 0.4656945 * exp(4.85257660054472e - 7 * x0)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

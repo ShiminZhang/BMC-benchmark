@@ -1,0 +1,8 @@
+{
+    "original_equation": "(x0*3.3527729e-6)**(-x0 + x0 + exp(0.3827586 - 3.094076e-6*x0) + 5.7553062)*1.5701183",
+    "leading_term": "4.87480070704612e-32*3.3527729e-6**(1.46632401672307*exp(-3.094076e-6*x0))*x0**(5.7553062 + 1.46632401672307*exp(-3.094076e-6*x0))",
+    "type_of_equation": "NA",
+    "llm_upper_bound": "NA",
+    "llm_complexity": "NA",
+    "llm_confidence": 1.0
+}

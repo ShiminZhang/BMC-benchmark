@@ -1,0 +1,8 @@
+Using cache for beemextnc3f1
+Loaded cached model for beemextnc3f1
+Analyzing expression for instance: beemextnc3f1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beemextnc3f1.json
+Original equation: 1.29399766929068e-15*exp(x0**0.26822752)*exp(1.44785289941321*exp(-4.84656151679297e-16*exp(x0**0.26822752)))
+LLM concluded equation: 4.12769280941296e-9 * 1.0204836 ** ((2 * x) ** 0.4929634)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

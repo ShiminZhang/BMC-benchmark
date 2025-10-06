@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_195528",
+    "original_equation": "x0*((x0**(-0.14243186) + x0 - (x0 + 0.12174406))*0.0007516497 + 3.502915e-7) + exp(x0**(-x0 + x0 + 0.051246703))*0.090320095",
+    "llm_upper_bound": "2.86",
+    "reasoning": "1.  **Interpret the Expression:**\n        Let",
+    "llm_confidence": 0.9,
+    "llm_complexity": "O(1)",
+    "instance_name": "arbitrated_top_n4_w32_d32_e0",
+    "leading_term": "1.17247628312297*1.0175856**(51.1597434273066*exp(-2.0271377517936e-13*x0**2))",
+    "type_of_equation": "polynomial"
+}

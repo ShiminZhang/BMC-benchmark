@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251005_202234",
+  "original_equation": "1.29095383225845*exp(-x0**0.19640793)*exp(x0**0.21174176)",
+  "llm_upper_bound": "1.29095383225845",
+  "reasoning": "The given expression simplifies to `1.29095383225845 * exp(x0^2 * 0.01533383)`. We assume",
+  "llm_confidence": 0.95,
+  "llm_complexity": "O(exp(x0^2))",
+  "instance_name": "oc8051gmdaaddr",
+  "leading_term": "1.29095383225845*exp(-x0**0.19640793)*exp(x0**0.21174176)",
+  "type_of_equation": "exponential"
+}

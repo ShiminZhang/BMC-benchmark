@@ -1,0 +1,8 @@
+Using cache for cal159
+Loaded cached model for cal159
+Analyzing expression for instance: cal159
+==================================================
+Conclusion loaded from cache: ./results/conclusion//cal159.json
+Original equation: 4.02078798144287e-15*x0**2.415678
+LLM concluded equation: 1.016161^(x0^0.36585626)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

@@ -1,0 +1,8 @@
+Using cache for cal35
+Loaded cached model for cal35
+Analyzing expression for instance: cal35
+==================================================
+Conclusion loaded from cache: ./results/conclusion//cal35.json
+Original equation: 0.887991057510169*1.1829723**exp(x0**0.08984057)
+LLM concluded equation: exp(0.046632536 * x0 ** 0.34089446)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

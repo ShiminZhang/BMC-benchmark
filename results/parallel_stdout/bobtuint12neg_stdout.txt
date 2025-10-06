@@ -1,1 +1,8 @@
-Using cache for bobtuint12neg with save_equation: True
+Using cache for bobtuint12neg
+Loaded cached model for bobtuint12neg
+Analyzing expression for instance: bobtuint12neg
+==================================================
+Conclusion loaded from cache: ./results/conclusion//bobtuint12neg.json
+Original equation: 1.5473603e-5*x0
+LLM concluded equation: 1.5473603e - 5 * x0
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

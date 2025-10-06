@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200411",
+    "original_equation": "-0.07109138*x0 + x0*0.071091644",
+    "llm_upper_bound": "0.045066822",
+    "reasoning": "The given expression is `0.045066822 * x0 * * 0.07433416`. The problem states `**` means power and asks for the upper bound",
+    "llm_confidence": 0.95,
+    "llm_complexity": "O(K^0.07433416)",
+    "instance_name": "6s355rb11080",
+    "leading_term": "0.045066822*x0**0.07433416",
+    "type_of_equation": "linear"
+}

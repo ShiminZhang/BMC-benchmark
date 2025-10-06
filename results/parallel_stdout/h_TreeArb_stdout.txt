@@ -1,0 +1,8 @@
+Using cache for h_TreeArb
+Loaded cached model for h_TreeArb
+Analyzing expression for instance: h_TreeArb
+==================================================
+Conclusion loaded from cache: ./results/conclusion//h_TreeArb.json
+Original equation: 0.0139231173721503*exp(x0**0.1691695)
+LLM concluded equation: x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

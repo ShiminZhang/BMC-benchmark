@@ -1,0 +1,8 @@
+Using cache for 6s205b20
+Loaded cached model for 6s205b20
+Analyzing expression for instance: 6s205b20
+==================================================
+Conclusion loaded from cache: ./results/conclusion//6s205b20.json
+Original equation: 5.38424e-7*x0**0.9564359
+LLM concluded equation: 5.79281957877077e - 16 * x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

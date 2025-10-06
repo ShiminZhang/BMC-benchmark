@@ -1,0 +1,8 @@
+Using cache for beemelev2f1
+Loaded cached model for beemelev2f1
+Analyzing expression for instance: beemelev2f1
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beemelev2f1.json
+Original equation: exp(0.01812826119903*x0**0.34832877)
+LLM concluded equation: 2.62300000105631e - 5 * x0
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

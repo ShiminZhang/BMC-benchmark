@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_200920",
+    "original_equation": "exp(((x0*144.59932 - (x0*146.59929 - (x0 + 2.2973835) - (x0 + 2.2973835)))*0.3123472)**0.40350702)",
+    "llm_upper_bound": "exp(0.009371 * x0^0.40350702)",
+    "reasoning": "The given expression is `exp( (c1 * x0 + c2)^c3 )`. As `x0` becomes large, the constant term `c2` in the inner expression `c1 * x0 + c2` becomes negligible compared to `c1 * x0`. Therefore, `(c1 * x0 + c2)^c3` is asymptotically equivalent to `(c1 * x0)^c3 = c1^c3 * x0^c3`. Let `C_prime = c1^c3 = (9.3704160029743e-6)^0.40350702 \u2248 0.009371`. Thus, the function is asymptotically equivalent to `exp(0.009371 * x0^0.40350702)`. This is an exponential function because the variable `x0` appears in the exponent of `e`, even though `x0` itself is raised to a fractional power (`0.40350702`). This function grows faster than any polynomial function. The least upper bound formula is the asymptotic form of the function itself.",
+    "llm_confidence": 1.0,
+    "llm_complexity": "O(exp(0.009371 * x0^0.40350702))",
+    "instance_name": "bc57sensorsp2",
+    "leading_term": "exp((9.3704160029743e-6*x0 + 1.4351626071024)**0.40350702)",
+    "type_of_equation": "exponential"
+}

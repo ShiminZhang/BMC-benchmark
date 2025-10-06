@@ -1,0 +1,8 @@
+Using cache for 6s43
+Loaded cached model for 6s43
+Analyzing expression for instance: 6s43
+==================================================
+Conclusion loaded from cache: ./results/conclusion//6s43.json
+Original equation: 0.000117330878867029*exp(x0**0.18663967)
+LLM concluded equation: 4.78772182883628e - 17 * x0^3
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

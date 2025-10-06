@@ -6,10 +6,10 @@ import pickle
 import hashlib
 import pysr
 from ..category import get_all_instance_names
-from ..paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path
+from ..paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path, get_conclusion_path
 import numpy as np
 import argparse
-from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation
+from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation,load_original_data,load_regression_equation
 from .sympy_analysis import extract_leading_term
 import multiprocessing
 from multiprocessing import Pool, cpu_count
@@ -30,18 +30,19 @@ def get_data_hash(data):
 def load_cached_model(name, data_hash=None):
     """Load a cached PySR model if it exists and data hasn't changed"""
     cache_path = get_pysr_cache_path(name)
-    cache_info_path = cache_path.replace('.pkl', '_info.json')
+    # cache_info_path = cache_path.replace('.pkl', '_info.json')
     
-    if os.path.exists(cache_path) and os.path.exists(cache_info_path):
+    # if os.path.exists(cache_path) and os.path.exists(cache_info_path):
+    if os.path.exists(cache_path):
         try:
-            # Load cache info
-            with open(cache_info_path, 'r') as f:
-                cache_info = json.load(f)
+            # # Load cache info
+            # with open(cache_info_path, 'r') as f:
+            #     cache_info = json.load(f)
             
-            # Check if data hash matches (if provided)
-            if data_hash and cache_info.get('data_hash') != data_hash:
-                print(f"Data has changed for {name}, cache invalid")
-                return None
+            # # Check if data hash matches (if provided)
+            # if data_hash and cache_info.get('data_hash') != data_hash:
+            #     print(f"Data has changed for {name}, cache invalid")
+            #     return None
             
             # Load the model
             with open(cache_path, 'rb') as f:
@@ -157,9 +158,7 @@ def get_pysr_config(config_type="balanced"):
             "niterations": 250,  # More iterations for better exploration
             "binary_operators": ["+", "-", "*", "^"],  # All basic operations
             "unary_operators": ["exp"],  # Include exponential functions
-            "constraints": {"maxdepth": 5,'^': (-1, 1)},
-            "parsimony": 1e-5,
-            "warm_start": False,
+            "constraints": {"maxdepth": 5},
             # "maxsize": 20,  # Allow enough complexity for exponential terms if needed
             # "maxdepth": 10,
             # "parsimony": 0.06,  # Lower parsimony to allow exponential terms if beneficial
@@ -167,7 +166,7 @@ def get_pysr_config(config_type="balanced"):
             # "elementwise_loss": "loss(x, y) = abs(x - y)",
             # "early_stop_condition": "stop_if(loss, complexity) = loss < 1e-8 && complexity < 15",
             # # Intelligent search parameters
-            # "warm_start": True,  # Use previous solutions as starting point
+            "warm_start": True,  # Use previous solutions as starting point
             # "populations": 4,  # Multiple populations for better exploration
             # "fraction_replaced": 0.08,  # Conservative replacement to maintain good solutions
             # "tournament_selection_n": 5,  # Tournament selection for better diversity
@@ -283,20 +282,21 @@ def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     
     # k as x
     k = [float(item[0]) for item in items]  # Convert string keys to float
+    x_data, y_data = load_original_data(name)
+    # # size as x
+    # size = [float(item[1]["size_of_cnf"]) for item in items]  # Convert string keys to float
 
-    # size as x
-    size = [float(item[1]["size_of_cnf"]) for item in items]  # Convert string keys to float
-
-    # time as y
-    time = [float(item[1]["solving_time"]) for item in items]  # Extract values as targets
+    # # time as y
+    # time = [float(item[1]["solving_time"]) for item in items]  # Extract values as targets
     
-    x = size
-    y = time  # Extract values as targets
+    # x = size
+    # y = time  # Extract values as targets
     
-    # Convert to numpy arrays if needed
-    x = np.array(x).reshape(-1, 1)  # Reshape to 2D array for sklearn compatibility
-    y = np.array(y)
-    
+    # # Convert to numpy arrays if needed
+    x = np.array(x_data).reshape(-1, 1)  # Reshape to 2D array for sklearn compatibility
+    y = np.array(y_data)
+    # print(f"x: {x}")
+    # print(f"y: {y}")
     output_dir = get_pysr_results_dir() 
     os.makedirs(output_dir, exist_ok=True)
     
@@ -320,7 +320,14 @@ def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     # Save best equation
     if save_equation:
         save_best_equation(model, name)
-    
+    term = extract_leading_term(model.sympy())
+    result = {}
+    result["equation"] = str(model.sympy())
+    result["leading_term"] = str(term)
+    print(f"Leading term: {term}")
+    print(f"Saved to: {get_sympy_summary_path(name)}")
+    with open(get_sympy_summary_path(name), "w") as f:
+        json.dump(result, f, indent=4)
     return model
 
 def get_sympy_summary(name):
@@ -358,7 +365,11 @@ def run_pysr_and_check_with_llm(name, use_cache=False, config_type="auto"):
     llm_analysis(name, use_cache=use_cache)
 
 def run_pysr_and_conclude_with_llm(name, use_cache=False, config_type="auto", plot=False):
-    model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
+    if use_cache:
+        print(f"Using cache for {name}")
+        model = load_cached_model(name)
+    model = model or run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
+
     if model is None:
         print(f"No model found for {name}")
         return
@@ -374,7 +385,7 @@ def run_pysr_and_conclude_with_llm(name, use_cache=False, config_type="auto", pl
         llm_equation = conclusion["llm_upper_bound"]
         equations ={"pysr_equation": equation, "leading_term": leading_term, "upper_bound": llm_equation}
         plot_original_vs_equation(name, conclusion["type_of_equation"], equations, label="LLM_included")
-        equations ={"pysr_equation": equation, "leading_term": leading_term}
+        equations ={"pysr_equation": equation}
         plot_original_vs_equation(name, conclusion["type_of_equation"], equations, label="original_only")
 
 def process_single_instance(args):
@@ -526,6 +537,7 @@ def main():
                        help="PySR configuration type (default: auto - lets PySR discover the best form)")
     parser.add_argument("--llm_analysis", action="store_true", help="Only run LLM analysis")
     parser.add_argument("--find_insufficient_data", action="store_true", help="Find insufficient data")
+    parser.add_argument("--sequential_conclude", action="store_true", help="Sequential LLM conclude expression")
     parser.add_argument("--llm_conclude_expression", action="store_true", help="Only run LLM conclude expression")
     parser.add_argument("--parallel_llm_conclude_expression", action="store_true", help="Parallel LLM conclude expression")
     parser.add_argument("--max_workers", type=int, default=None, help="Maximum number of parallel workers for parallel processing")
@@ -536,7 +548,7 @@ def main():
 
     if args.parallel_llm_conclude_expression:
         interested_names = get_all_instance_names()
-        interested_names = list(interested_names)[:10]
+        interested_names = sorted(list(interested_names))
         # interested_names = ["6s0", "6s109", "bob2"]
         print("🚀 Starting parallel LLM conclude expression analysis...")
         results = parallel_llm_conclude_expression(
@@ -600,6 +612,45 @@ def main():
                 print(f"✅ Plot saved to: {plot_path}")
             else:
                 print("❌ Plot creation failed")
+    elif args.sequential_conclude:
+        interested_names = get_all_instance_names()
+        interested_names = sorted(list(interested_names))
+        for name in interested_names:
+            if f"{name}.json" not in os.listdir(get_solving_times_dir()):
+                continue
+            equation = load_regression_equation(name)
+            if equation is None:
+                if not run_pysr(name, use_cache=args.use_cache, save_equation=True, config_type=args.config):
+                    continue
+            sympy_summary = get_sympy_summary(name)
+            # equation = sympy_summary["equation"]
+            leading_term = sympy_summary["leading_term"]
+            # conclusion = llm_conclude_expression(name, equation, leading_term, True)
+            conclusion_path = get_conclusion_path(name)
+            if os.path.exists(conclusion_path):
+                with open(conclusion_path, "r") as f:
+                    conclusion = json.load(f)
+                if conclusion["original_equation"] != equation:
+                    print(f"Original equation: {equation}")
+                    print(f"LLM concluded equation: {conclusion['original_equation']}")
+                    conclusion["original_equation"] = equation
+                    with open(get_conclusion_path(name), "w") as f:
+                        json.dump(conclusion, f, indent=4)
+            else:
+                print(f"Conclusion not found for {name}, creating new one")
+                conclusion = {}
+                conclusion["original_equation"] = equation
+                conclusion["leading_term"] = leading_term
+                conclusion["type_of_equation"] = "NA"
+                conclusion["llm_upper_bound"] = "NA"
+                conclusion["llm_complexity"] = "NA"
+                conclusion["llm_confidence"] = 1.0
+                with open(get_conclusion_path(name), "w") as f:
+                    json.dump(conclusion, f, indent=4)
+                print(f"Conclusion saved to {get_conclusion_path(name)}")        
+                equations ={"pysr_equation": equation}
+                plot_original_vs_equation(name, conclusion["type_of_equation"], equations, label="original_only")
+
     elif args.llm_conclude_expression:
         print(f"Using cache: {args.use_cache}")
         run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot) 
@@ -616,6 +667,7 @@ def main():
                 print(f"Leading term: {term}")
             else:
                 model = run_pysr(name, use_cache=args.use_cache, save_equation=True, config_type=args.config)
+                print(f"Model: {model.sympy()}")
                 term = extract_leading_term(model.sympy())
                 result = {}
                 result["equation"] = str(model.sympy())

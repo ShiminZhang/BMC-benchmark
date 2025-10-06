@@ -1,0 +1,8 @@
+Using cache for 6s194
+Loaded cached model for 6s194
+Analyzing expression for instance: 6s194
+==================================================
+Conclusion loaded from cache: ./results/conclusion//6s194.json
+Original equation: 0.8456915*(-14.098426*x0**0.2590446 + 5.9922363e-6*x0**1.2590446)**(0.92888147**x0)
+LLM concluded equation: 4.34154940489908e - 11 * K^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

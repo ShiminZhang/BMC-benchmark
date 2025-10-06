@@ -1,0 +1,8 @@
+Using cache for beembrptwo3b2
+Loaded cached model for beembrptwo3b2
+Analyzing expression for instance: beembrptwo3b2
+==================================================
+Conclusion loaded from cache: ./results/conclusion//beembrptwo3b2.json
+Original equation: (0.33209002*exp(x0**0.06505392) - 1.77103765)**5.6177793
+LLM concluded equation: 0.0020509068 * exp(0.3654499099776 * x0^0.06505392)
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache

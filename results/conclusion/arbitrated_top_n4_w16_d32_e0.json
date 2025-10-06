@@ -1,0 +1,11 @@
+{
+    "timestamp": "20250905_195351",
+    "original_equation": "(41.153942 + x0*(-2.2075705e-5))*((exp(40.71931 + x0*(-2.2075705e-5))**1.7909486)**(x0 - (x0 - 0.06495545) - 0.05905397) - 1.0162255)",
+    "llm_upper_bound": "0",
+    "reasoning": "1.  **Interpret the Expression:**\n        The given expression is: `- 3.39486857401138e - 5 * x0 * (exp( - 2.2075705e - 5 * x0) * * 1.7909486) * * 0.00590148`\n        The hint `power 2**2 is 2^2` indicates that `**` is the exponentiation operator.\n        So, `(exp( - 2.2075705e - 5 * x0) ** 1.7909486) ** 0.00590148` means `(exp( - 2.2075705e - 5 * x0)) ^ (1.7909486 * 0.00590148)`.\n        This simplifies to `exp( - 2.2075705e - 5 * x0 * 1.7909486 * 0.00590148)`.\n\n    2.  **Simplify the Expression to a General Form:**\n        Let",
+    "llm_confidence": 0.95,
+    "llm_complexity": "O(1)",
+    "instance_name": "arbitrated_top_n4_w16_d32_e0",
+    "leading_term": "-3.39486857401138e-5*x0*(exp(-2.2075705e-5*x0)**1.7909486)**0.00590148",
+    "type_of_equation": "exponential"
+}

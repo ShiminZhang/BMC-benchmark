@@ -1,7 +1,8 @@
-Using cache for zipcpu-pfcache-p13 with save_equation: True
-Loading cached model for zipcpu-pfcache-p13 with data hash: e6a471f32bce42d104f80fab3eb9fb3e
+Using cache for zipcpu-pfcache-p13
 Loaded cached model for zipcpu-pfcache-p13
-Saved best equation for zipcpu-pfcache-p13: x0**1.0678383*0.017542707
 Analyzing expression for instance: zipcpu-pfcache-p13
 ==================================================
-No conclusion found for zipcpu-pfcache-p13
+Conclusion loaded from cache: ./results/conclusion//zipcpu-pfcache-p13.json
+Original equation: 1.6486827e-7*x0**1.0575013
+LLM concluded equation: x0^2
+results are loaded from cache, the llm_upper_bound is not NA, so we will use the cache
