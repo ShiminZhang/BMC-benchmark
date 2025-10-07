@@ -1,0 +1,10 @@
+[2025-09-05 13:08:54] [generate_and_run_up_to_limit] Generating and running 6s350rb35 with K<=5000 up to limit 1800
+[2025-09-05 13:08:54] [generate_cnf] Generating formula 6s350rb35 with K=1
+[2025-09-05 13:08:54] [run_formula] Running formula 6s350rb35 with K=1 up to limit 1800
+[2025-09-05 13:08:54] [generate_cnf] Generating formula 6s350rb35 with K=11
+[2025-09-05 13:08:54] [run_formula] Running formula 6s350rb35 with K=11 up to limit 1800
+[2025-09-05 13:08:54] [generate_cnf] Generating formula 6s350rb35 with K=21
+[2025-09-05 13:08:54] [run_formula] Running formula 6s350rb35 with K=21 up to limit 1800
+[2025-09-05 13:08:54] [generate_cnf] Generating formula 6s350rb35 with K=31
+[2025-09-05 13:10:28] [generate_and_run_up_to_limit] Failed to generate CNF for 6s350rb35 with K=31, halting
+slurmstepd: error: Detected 1 oom_kill event in StepId=49287920.batch. Some of the step tasks have been OOM Killed.

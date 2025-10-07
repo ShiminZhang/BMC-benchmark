@@ -42,6 +42,6 @@
 
 *.cnf
 *.log
-
+!logs/**/*.log
 results/pysr_results/
 *.pyc
