@@ -38,4 +38,4 @@ Goal: discriminate clearly linear instances from clearly exponential
   - Too few data: should be treated the same as unknown. This includes Exponential(too few data)
 
 ## Additional Notes
-- Missing or malformed LLM outputs remain `NA` in `report_checked.csv`; manual review ensures these omissions do not affect the labels correctness.
+- Missing or malformed or failed-to-parse LLM outputs remain `NA` in `report_checked.csv`; manual review ensures these omissions do not affect the labels correctness.
