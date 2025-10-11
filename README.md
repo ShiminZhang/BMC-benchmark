@@ -17,7 +17,7 @@ Goal: discriminate clearly linear instances from clearly exponential
    - Fit solve time as a function of CNF clause count using `pysr`.
    - Simplify the resulting expressions with `sympy`.
 3. **Asymptotic interpretation**
-   - Use Gemini-Flash to infer asymptotic growth from the simplified expressions.
+   - Use Gemini-2.5-Flash to infer asymptotic growth from the simplified expressions.
    - Validate Pysr and GPT outputs through manual review of plots and expressions.
 4. **Visualization**
    - Plot clause count (x-axis) versus solve time (y-axis) for each instance.
@@ -39,4 +39,4 @@ Goal: discriminate clearly linear instances from clearly exponential
   - Too few data: should be treated the same as unknown. This includes Exponential(too few data)
 
 ## Additional Notes
-- Missing or malformed or failed-to-parse LLM outputs remain `NA` in `report_checked.csv`; manual review ensures these omissions do not affect the labels correctness.
+- Missing or malformed or failed-to-parse or out-of-token LLM outputs remain `NA` in `report_checked.csv`; manual review ensures these omissions do not affect the labels correctness.
