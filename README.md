@@ -26,6 +26,7 @@ Goal: discriminate clearly linear instances from clearly exponential
 ## Results
 - Final curated labels and supporting data are stored in `report_checked.csv`.
 - Solver logs, including hardware metadata and timestamps, are available under `results/solving_logs/`.
+- Arguments from LLM of upper bounds are in results/conclusion/
 - A condensed view of the conclusions is published at: https://docs.google.com/spreadsheets/d/1L0ndBIWAwAvGYVo3usdulh3baRSvy_p9cTdlEUNFt6U/edit?usp=sharing
 
 ## Classification Criteria
