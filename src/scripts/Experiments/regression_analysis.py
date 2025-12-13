@@ -9,7 +9,11 @@ from ..category import get_all_instance_names
 from ..paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path, get_conclusion_path
 import numpy as np
 import argparse
-from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation,load_original_data,load_regression_equation
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation,load_original_data,load_regression_equation,load_original_data_with_k, safe_evaluate_equation
+from ..paths import get_plot_path
 from .sympy_analysis import extract_leading_term
 import multiprocessing
 from multiprocessing import Pool, cpu_count
@@ -248,7 +252,45 @@ def get_pysr_config(config_type="balanced"):
     else:
         raise ValueError(f"Unknown config_type: {config_type}. Use 'auto', 'balanced', 'exponential', 'simple', 'accurate', or 'custom'")
 
-def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
+def filter_k_step_data(k_data, x_data, y_data):
+    """Filter data to only include consecutive k values with step = 1.
+    
+    Args:
+        k_data: Array of k values
+        x_data: Array of x values (CNF sizes)
+        y_data: Array of y values (solving times)
+    
+    Returns:
+        Filtered (k_data, x_data, y_data) arrays containing only consecutive k values
+    """
+    # Sort by k values
+    sorted_indices = np.argsort(k_data)
+    k_sorted = k_data[sorted_indices]
+    x_sorted = x_data[sorted_indices]
+    y_sorted = y_data[sorted_indices]
+    
+    # Find consecutive points where k step == 1
+    filtered_indices = [0]  # Always include the first point
+    
+    for i in range(1, len(k_sorted)):
+        k_diff = k_sorted[i] - k_sorted[i-1]
+        if k_diff == 1:
+            # Continue when k step is exactly 1
+            filtered_indices.append(i)
+        elif k_diff > 1:
+            # Stop when k step exceeds 1
+            break
+        # Skip if k_diff < 1 (duplicate or out of order)
+    
+    k_filtered = k_sorted[filtered_indices]
+    x_filtered = x_sorted[filtered_indices]
+    y_filtered = y_sorted[filtered_indices]
+    
+    print(f"Filtered data: {len(filtered_indices)}/{len(k_data)} points (k from {k_filtered[0]} to {k_filtered[-1]})")
+    
+    return k_filtered, x_filtered, y_filtered
+
+def run_pysr(name, use_cache=False, save_equation=True, config_type="auto", x_data=None, y_data=None):
     # Load data first to get hash
     
     # Check if cached model exists and is valid
@@ -275,26 +317,18 @@ def run_pysr(name, use_cache=False, save_equation=True, config_type="auto"):
     
     print(f"Training new model for {name} with {config_type} configuration...")
     
-    # Convert data to proper format for PySR
-    # data.items() gives us (key, value) pairs, we need to separate them
-    items = list(data.items())
-    # Convert string keys to numeric values
+    # Use provided data or load from file
+    if x_data is None or y_data is None:
+        x_data, y_data = load_original_data(name)
     
-    # k as x
-    k = [float(item[0]) for item in items]  # Convert string keys to float
-    x_data, y_data = load_original_data(name)
-    # # size as x
-    # size = [float(item[1]["size_of_cnf"]) for item in items]  # Convert string keys to float
-
-    # # time as y
-    # time = [float(item[1]["solving_time"]) for item in items]  # Extract values as targets
+    # Convert to numpy arrays if needed
+    if not isinstance(x_data, np.ndarray):
+        x_data = np.array(x_data)
+    if not isinstance(y_data, np.ndarray):
+        y_data = np.array(y_data)
     
-    # x = size
-    # y = time  # Extract values as targets
-    
-    # # Convert to numpy arrays if needed
-    x = np.array(x_data).reshape(-1, 1)  # Reshape to 2D array for sklearn compatibility
-    y = np.array(y_data)
+    x = x_data.reshape(-1, 1)  # Reshape to 2D array for sklearn compatibility
+    y = y_data
     # print(f"x: {x}")
     # print(f"y: {y}")
     output_dir = get_pysr_results_dir() 
@@ -359,10 +393,171 @@ def batch_save_equations(names=None, use_cache=True, config_type="auto"):
     
     return results
 
+def plot_original_vs_equation_with_data(instance_name, type_of_equation: str, equations: dict, x_data, y_data, label=""):
+    """Plot comparison of data and equation using provided data"""
+    # Create the plot
+    plt.figure(figsize=(12, 8))
+    
+    # Plot original data points
+    plt.scatter(x_data, y_data, color='black', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    print(f"Plotting equations: {equations}")
+    
+    # Plot equations
+    for key, equation in equations.items():
+        print(f"Plotting equation {key}: {equation}")
+        x_plot = np.linspace(x_data.min(), x_data.max(), 1000)
+        y_equation = safe_evaluate_equation(equation, x_plot)
+        
+        # Create unique label for each equation
+        equation_label = f"{key}: {equation}"
+        plt.plot(x_plot, y_equation, linewidth=2, label=equation_label, alpha=0.8)
+    
+    type_of_equation_label = f"Growth type: {type_of_equation}"
+    plt.xlabel('Number of clauses in CNF formula', fontsize=12)
+    plt.ylabel('Solving Time (seconds)', fontsize=12)
+    plt.title(f'Comparison: Original Data vs Fitted Equation\nInstance: {instance_name}\n{type_of_equation_label}', 
+             fontsize=14, pad=20)
+    plt.legend(fontsize=10, loc='best')
+    plt.grid(True, alpha=0.3)
+    figure_path = get_plot_path(instance_name)
+    figure_path = figure_path.replace(".png", f"_{label}.png")
+    plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"Plot saved to: {figure_path}")
+    plt.close()
+    
+    return figure_path
+
+def plot_dual_comparison_with_data(instance_name, type_of_equation: str, equations: dict, k_data, x_data, y_data, label=""):
+    """Plot dual comparison using provided data"""
+    # Create figure with two subplots side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    
+    print(f"Plotting dual comparison for {instance_name}")
+    print(f"Equations: {equations}")
+    
+    # ========== LEFT SUBPLOT: CNF Size vs Solving Time ==========
+    ax1.scatter(x_data, y_data, color='black', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    
+    # Plot equations on left subplot
+    for key, equation in equations.items():
+        print(f"Plotting equation {key}: {equation}")
+        x_plot = np.linspace(x_data.min(), x_data.max(), 1000)
+        y_equation = safe_evaluate_equation(equation, x_plot)
+        
+        # Create unique label for each equation
+        equation_label = f"{key}: {equation[:50]}..." if len(equation) > 50 else f"{key}: {equation}"
+        ax1.plot(x_plot, y_equation, linewidth=2, label=equation_label, alpha=0.8)
+    
+    ax1.set_xlabel('Number of clauses in CNF formula', fontsize=12)
+    ax1.set_ylabel('Solving Time (seconds)', fontsize=12)
+    ax1.set_title(f'CNF Size vs Solving Time\nInstance: {instance_name}', fontsize=14)
+    ax1.legend(fontsize=9, loc='best')
+    ax1.grid(True, alpha=0.3)
+    
+    # ========== RIGHT SUBPLOT: K Value vs Solving Time ==========
+    ax2.scatter(k_data, y_data, color='blue', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    
+    # For k plot, we show the data points
+    ax2.set_xlabel('K value', fontsize=12)
+    ax2.set_ylabel('Solving Time (seconds)', fontsize=12)
+    ax2.set_title(f'K Value vs Solving Time\nInstance: {instance_name}', fontsize=14)
+    ax2.legend(fontsize=9, loc='best')
+    ax2.grid(True, alpha=0.3)
+    
+    # Save the plot
+    figure_path = get_plot_path(instance_name)
+    figure_path = figure_path.replace(".png", f"_dual_{label}.png")
+    plt.tight_layout()
+    plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"Dual plot saved to: {figure_path}")
+    plt.close()
+    
+    return figure_path
+
 def run_pysr_and_check_with_llm(name, use_cache=False, config_type="auto"):
     model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type)
     print(f"Best equation: {model.sympy()}")
     llm_analysis(name, use_cache=use_cache)
+
+def run_pysr_and_plot(name, use_cache=False, config_type="auto"):
+    """Run PySR regression and plot the results without LLM analysis
+    
+    Only uses data points where k_step = 1 (consecutive k values).
+    Stops when the next data point's k value exceeds the previous by more than 1.
+    
+    Args:
+        name: Instance name to analyze
+        use_cache: Whether to use cached PySR model
+        config_type: PySR configuration type (default: "auto")
+    
+    Returns:
+        Path to the saved plot file, or None if plotting failed
+    """
+    # Load data with k values and filter to only include k_step = 1 consecutive data
+    print(f"Loading data for {name} and filtering for k_step = 1...")
+    k_data, x_data, y_data = load_original_data_with_k(name)
+    
+    # Filter data to only include consecutive k values with step = 1
+    k_filtered, x_filtered, y_filtered = filter_k_step_data(k_data, x_data, y_data)
+    
+    if len(k_filtered) < 2:
+        print(f"Not enough consecutive k data points ({len(k_filtered)}) for {name}")
+        return None
+    
+    # Load or train the model with filtered data
+    if use_cache:
+        print(f"Using cache for {name}")
+        model = load_cached_model(name)
+    else:
+        model = None
+    
+    # If no cached model, train with filtered data
+    if model is None:
+        print(f"Training model with {len(k_filtered)} filtered data points...")
+        model = run_pysr(name, use_cache=use_cache, save_equation=True, config_type=config_type, 
+                        x_data=x_filtered, y_data=y_filtered)
+    
+    if model is None:
+        print(f"No model found for {name}")
+        return None
+    
+    # Get the sympy equation and leading term
+    sympy_summary = get_sympy_summary(name)
+    equation = sympy_summary["equation"]
+    leading_term = sympy_summary["leading_term"]
+    
+    print(f"PySR equation: {equation}")
+    print(f"Leading term: {leading_term}")
+    
+    equations = {
+        "pysr_equation": equation,
+        "leading_term": leading_term
+    }
+    
+    # Create single plot with data points and equation line
+    print("\n📊 Creating single plot with data points and fitted equation...")
+    single_plot_path = plot_original_vs_equation_with_data(name, "fitted", equations, 
+                                                           x_filtered, y_filtered, label="pysr_plot")
+    
+    if single_plot_path:
+        print(f"✅ Single plot saved successfully")
+    else:
+        print("❌ Single plot creation failed")
+    
+    # Create dual plot (CNF size + K value)
+    print("\n📊 Creating dual comparison plot (CNF size + K value)...")
+    dual_plot_path = plot_dual_comparison_with_data(name, "fitted", equations, 
+                                                     k_filtered, x_filtered, y_filtered, label="pysr_plot")
+    
+    if dual_plot_path:
+        print(f"✅ Dual plot saved successfully")
+    else:
+        print("❌ Dual plot creation failed")
+    
+    return single_plot_path, dual_plot_path
 
 def run_pysr_and_conclude_with_llm(name, use_cache=False, config_type="auto", plot=False):
     if use_cache:
@@ -541,6 +736,8 @@ def main():
     parser.add_argument("--llm_conclude_expression", action="store_true", help="Only run LLM conclude expression")
     parser.add_argument("--parallel_llm_conclude_expression", action="store_true", help="Parallel LLM conclude expression")
     parser.add_argument("--max_workers", type=int, default=None, help="Maximum number of parallel workers for parallel processing")
+    parser.add_argument("--pysr_plot", action="store_true", help="Run PySR and plot without LLM analysis")
+    parser.add_argument("--pysr_plot_manage", action="store_true", help="Submit PySR plot job to SLURM")
 
     args = parser.parse_args()
 
@@ -653,7 +850,47 @@ def main():
 
     elif args.llm_conclude_expression:
         print(f"Using cache: {args.use_cache}")
-        run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot) 
+        run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot)
+    elif args.pysr_plot_manage:
+        # Build the command for sbatch
+        activate_python = "source ../general/bin/activate"
+        interested_names = get_all_instance_names()
+        interested_names = sorted(list(interested_names))
+        for name in interested_names:
+            # Build command with proper flags
+            cmd_parts = [
+                activate_python,
+                "&&",
+                "python -m src.scripts.Experiments.regression_analysis",
+                "--pysr_plot",
+                f"--instance_name {name}",
+                f"--config {args.config}"
+            ]
+            
+            # Only add --use_cache flag if it's True (action="store_true")
+            if args.use_cache:
+                cmd_parts.append("--use_cache")
+            
+            cmd = " ".join(cmd_parts)
+            
+            # Build sbatch command with full output path
+            output_path = f"logs/pysr_plot_{name}.out"
+            sbatch_cmd = f"sbatch --job-name=pysr_plot_{name} --output={output_path} --mem=16g --time=4:00:00 --wrap=\"{cmd}\""
+            
+            print(f"Submitting job: {sbatch_cmd}")
+            os.system(sbatch_cmd)
+    elif args.pysr_plot:
+        print(f"Running PySR and plotting for {args.instance_name}")
+        print(f"Using cache: {pysr_use_cache}")
+        single_plot_path, dual_plot_path = run_pysr_and_plot(args.instance_name, pysr_use_cache, args.config)
+        if single_plot_path:
+            print(f"✅ Single plot saved to: {single_plot_path}")
+        else:
+            print("❌ Single plot creation failed")
+        if dual_plot_path:
+            print(f"✅ Dual plot saved to: {dual_plot_path}")
+        else:
+            print("❌ Dual plot creation failed")
     else:
         names = get_all_instance_names()
         for name in names:

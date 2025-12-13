@@ -60,7 +60,7 @@ def main():
             collect_solving_time(os.path.join(solving_log_dir, formula_dir))
     elif args.all_slurm:
         solving_log_dir = get_solving_log_dir()
-        activate_python = "source ../general/bin/activate"
+        activate_python = "source ../../general/bin/activate"
         for formula_dir in os.listdir(solving_log_dir):
             wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {os.path.join(solving_log_dir, formula_dir)}"
             os.system(f"sbatch --job-name=collect_solving_time_{formula_dir} --output={os.path.join(solving_log_dir, formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
