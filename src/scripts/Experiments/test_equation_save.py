@@ -5,7 +5,7 @@ Test script for equation saving functionality
 
 import json
 import os
-from ..paths import get_pysr_summary_path
+from paths import get_pysr_summary_path
 
 def test_equation_format():
     """Test the equation JSON format"""

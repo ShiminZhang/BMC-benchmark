@@ -1,9 +1,8 @@
-from .. import helpers 
-from ..paths import get_solving_times_path, get_solving_log_dir, get_cnf_path
+from paths import get_solving_times_path, get_solving_log_dir, get_cnf_path
 import os
 import json
 import argparse
-from ..GenericRA import LOG, TOGGLE_SHOWLOG
+from GenericRA import LOG, TOGGLE_SHOWLOG, GetDataFromLog
 from tqdm import tqdm
 
 # this function is supposed to collect the solving time of a formula with all Ks
@@ -35,7 +34,7 @@ def collect_solving_time(formula_dir, time_limit=0, k_limit=0):
         with open(cnf_path, "r") as f:
             number_of_lines = len(f.readlines())
             size_of_cnf = number_of_lines - 2
-        solving_time = helpers.GetDataFromLog(os.path.join(formula_dir, log_file))
+        solving_time = GetDataFromLog(os.path.join(formula_dir, log_file))
         if solving_time is not None:
             output_dict[k] = {"solving_time": solving_time, "size_of_cnf": size_of_cnf}
     output_dict = dict(sorted(output_dict.items(), key=lambda x: int(x[0])))

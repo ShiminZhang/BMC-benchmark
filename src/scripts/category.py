@@ -1,5 +1,5 @@
 import os
-from .paths import get_aig_dir
+from paths import get_aig_dir
 
 def get_all_instance_names():
     aig_dir = get_aig_dir()

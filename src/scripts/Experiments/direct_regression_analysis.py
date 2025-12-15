@@ -8,49 +8,75 @@ This script performs regression analysis on solving time data by fitting differe
 import os
 import json
 import argparse
+import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from sklearn.metrics import r2_score
 from typing import Tuple, Dict, Any, Optional
+from regression_analysis import load_original_data_with_k,filter_k_step_data
+from paths import get_solving_times_path, get_plots_dir
+from category import get_all_instance_names
 
-from ..paths import get_solving_times_path, get_plots_dir
-from ..category import get_all_instance_names
+
+def make_json_serializable(obj):
+    """
+    Recursively convert numpy types to Python native types for JSON dumping.
+    """
+    if isinstance(obj, dict):
+        return {k: make_json_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [make_json_serializable(v) for v in obj]
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (np.floating, np.integer)):
+        return obj.item()
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    return obj
 
 
 def load_solving_data(instance_name: str) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Load solving time data for a given instance.
-    
-    Args:
-        instance_name: Name of the instance to load data for
-        
-    Returns:
-        Tuple of (x_data, y_data) where x_data is CNF size and y_data is solving time
-        
-    Raises:
-        FileNotFoundError: If the solving times file doesn't exist
-        ValueError: If the data format is invalid
-    """
-    solving_times_path = get_solving_times_path(instance_name)
-    
-    if not os.path.exists(solving_times_path):
-        raise FileNotFoundError(f"Solving times file not found: {solving_times_path}")
-    
-    try:
-        with open(solving_times_path, 'r') as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError) as e:
-        raise ValueError(f"Failed to load solving times from {solving_times_path}: {e}")
-    
-    if not data:
-        raise ValueError(f"No data found in {solving_times_path}")
-    
-    # Convert string keys to float and extract values
-    x_data = [float(v["size_of_cnf"]) for v in data.values()]
-    y_data = [float(v["solving_time"]) for v in data.values()]
-    
-    return np.array(x_data), np.array(y_data)
+    k_data, x_data, y_data = load_original_data_with_k(instance_name)
+    k_filtered, x_filtered, y_filtered = filter_k_step_data(k_data, x_data, y_data)
+    # 运行最大，保证非降
+    y_running_max = np.maximum.accumulate(y_filtered)
+
+    # 找到 running max 发生上升的拐点索引（含首尾）
+    n = len(y_running_max)
+    change_idxs = np.r_[0, np.flatnonzero(np.diff(y_running_max) != 0) + 1, n - 1]
+    change_idxs = np.unique(change_idxs)
+
+    # 以 x 作为插值自变量，分段线性插值连接相邻拐点
+    x_knots = x_filtered[change_idxs]
+    y_knots = y_running_max[change_idxs].astype(float)
+
+
+    # 最后一段插值到 1600（若已超过则不降低）
+    if len(x_data) < 100:
+        if y_knots.size > 0 and y_knots[-1] < 1600.0:
+            y_knots[-1] = 1600.0
+
+    # 去除可能的重复 x 结点，避免 np.interp 报错
+    x_knots_unique, unique_idx = np.unique(x_knots, return_index=True)
+    y_knots_unique = y_knots[unique_idx]
+
+    y_interpolated = np.interp(x_filtered, x_knots_unique, y_knots_unique)
+
+    return x_filtered, y_interpolated
+    # keep only points where y strictly exceeds previous max
+    x_arr = np.array(x_filtered)
+    y_arr = np.array(y_filtered)
+    keep_mask = []
+    prev_max = -np.inf
+    for val in y_arr:
+        if val > prev_max:
+            keep_mask.append(True)
+            prev_max = val
+        else:
+            keep_mask.append(False)
+    keep_mask = np.array(keep_mask, dtype=bool)
+    return x_arr[keep_mask], y_arr[keep_mask]
 
 
 def exponential_func(x: np.ndarray, a: float, b: float) -> np.ndarray:
@@ -66,6 +92,13 @@ def exponential_func(x: np.ndarray, a: float, b: float) -> np.ndarray:
         Exponential function values
     """
     return a * np.exp(b * x)
+
+
+def exponential_func_with_offset(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
+    """
+    Exponential function with offset term for curve fitting: y = a * exp(b * x) + c
+    """
+    return a * np.exp(b * x) + c
 
 
 def fit_models(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
@@ -120,7 +153,7 @@ def fit_models(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
     # Polynomial model (adjust degree based on data size)
     try:
         # Use lower degree for fewer data points to avoid overfitting
-        poly_degree = min(4, len(x_data) - 1)
+        poly_degree = 3
         if poly_degree < 1:
             poly_degree = 1
             
@@ -139,32 +172,40 @@ def fit_models(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
     
     # Exponential model
     try:
-        # Normalize data to improve numerical stability
-        x_norm = (x_data - np.min(x_data)) / (np.max(x_data) - np.min(x_data) + 1e-10)
-        y_norm = (y_data - np.min(y_data)) / (np.max(y_data) - np.min(y_data) + 1e-10)
-        
-        # Add bounds to prevent overflow and improve convergence
-        # More conservative bounds for normalized data
-        bounds = ([0.001, -5], [100, 5])
-        
-        # Better initial guess based on data characteristics
-        if np.mean(y_norm) > 0.5:
-            initial_guess = [1.0, 0.1]  # Growing exponential
-        else:
-            initial_guess = [1.0, -0.1]  # Decaying exponential
-            
-        popt_exp, pcov_exp = curve_fit(exponential_func, x_norm, y_norm, 
-                                     p0=initial_guess, bounds=bounds, 
-                                     maxfev=20000)
-        
-        # Transform back to original scale
-        y_pred_norm = exponential_func(x_norm, *popt_exp)
-        y_pred_exp = y_pred_norm * (np.max(y_data) - np.min(y_data)) + np.min(y_data)
-        
+        # Normalize x only to improve numerical stability; keep y in original scale
+        x_min, x_max = np.min(x_data), np.max(x_data)
+        x_range = x_max - x_min + 1e-10
+        x_norm = (x_data - x_min) / x_range
+
+        y_min, y_max = np.min(y_data), np.max(y_data)
+        y_range = y_max - y_min + 1e-10
+
+        # Initial guesses for parameters of y = a * exp(b * x_norm) + c
+        # Assume baseline near min(y), amplitude near (max - min)
+        c0 = float(y_min)
+        a0 = float(max(y_max - c0, 1e-6))
+        b0 = 1.0  # moderate growth in x_norm ∈ [0,1]
+        initial_guess = [a0, b0, c0]
+
+        # Bounds: a >= 0, b in a reasonable range for x_norm, c within a loose band around observed y
+        lower_bounds = [0.0, -50.0, y_min - 2.0 * y_range]
+        upper_bounds = [1e12, 50.0, y_max + 2.0 * y_range]
+
+        popt_exp, pcov_exp = curve_fit(
+            exponential_func_with_offset,
+            x_norm,
+            y_data,
+            p0=initial_guess,
+            bounds=(lower_bounds, upper_bounds),
+            maxfev=20000,
+        )
+
+        y_pred_exp = exponential_func_with_offset(x_norm, *popt_exp)
+
         # Check for invalid values (inf, nan)
         if np.any(np.isinf(y_pred_exp)) or np.any(np.isnan(y_pred_exp)):
             raise ValueError("Exponential model produced invalid predictions")
-            
+
         r2_exp = r2_score(y_data, y_pred_exp)
         results['exponential'] = {
             'parameters': popt_exp,
@@ -179,24 +220,31 @@ def fit_models(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
         # Try alternative approach with log transformation
         try:
             print("Trying alternative exponential fitting with log transformation...")
-            # Only try if all y values are positive
-            if np.all(y_data > 0):
-                log_y = np.log(y_data + 1e-10)  # Add small constant to avoid log(0)
-                linear_coeffs = np.polyfit(x_data, log_y, 1)
-                a = np.exp(linear_coeffs[1])
-                b = linear_coeffs[0]
-                y_pred_exp = a * np.exp(b * x_data)
+            # Shift y by baseline to be positive, fit log(y_shift) ~ b * x_norm + log(a)
+            x_min, x_max = np.min(x_data), np.max(x_data)
+            x_range = x_max - x_min + 1e-10
+            x_norm = (x_data - x_min) / x_range
+
+            baseline = float(np.min(y_data))
+            y_shift = y_data - baseline + 1e-10
+            if np.all(y_shift > 0):
+                log_y = np.log(y_shift)
+                linear_coeffs = np.polyfit(x_norm, log_y, 1)
+                a = float(np.exp(linear_coeffs[1]))
+                b = float(linear_coeffs[0])
+                c = float(baseline)
+                y_pred_exp = a * np.exp(b * x_norm) + c
                 r2_exp = r2_score(y_data, y_pred_exp)
-                
+
                 results['exponential'] = {
-                    'parameters': [a, b],
+                    'parameters': [a, b, c],
                     'covariance': None,
                     'predictions': y_pred_exp,
                     'r2_score': r2_exp
                 }
-                print(f"Alternative exponential model fitted with R² = {r2_exp:.4f}")
+                print(f"Alternative exponential model (with offset) fitted with R² = {r2_exp:.4f}")
             else:
-                raise ValueError("Cannot apply log transformation to non-positive values")
+                raise ValueError("Cannot apply log transformation due to non-positive shifted values")
         except Exception as e2:
             print(f"Alternative exponential fitting also failed: {e2}")
             results['exponential'] = {'r2_score': -np.inf}
@@ -214,14 +262,28 @@ def find_best_model(results: Dict[str, Any]) -> Tuple[str, float]:
     Returns:
         Tuple of (best_model_name, best_r2_score)
     """
-    valid_models = {k: v['r2_score'] for k, v in results.items() 
-                   if 'r2_score' in v and not np.isnan(v['r2_score'])}
+    valid_models = {k: v['r2_score'] for k, v in results.items()
+                    if isinstance(v, dict) and 'r2_score' in v and v['r2_score'] is not None and not np.isnan(v['r2_score'])}
     
     if not valid_models:
         return "None", -np.inf
     
-    best_model = max(valid_models, key=valid_models.get)
-    return best_model, valid_models[best_model]
+    # Apply selection bonus: linear gets +0.1 for tie-breaking preference
+    selection_scores: Dict[str, float] = {}
+    for model_name, r2 in valid_models.items():
+        try:
+            bonus = 0.1 if model_name == 'linear' else 0.0
+            selection_scores[model_name] = float(r2) + bonus
+        except Exception:
+            continue
+    
+    if not selection_scores:
+        return "None", -np.inf
+    
+    best_model = max(selection_scores, key=selection_scores.get)
+    # Return the raw R^2 for the best model (without bonus)
+    raw_best_r2 = float(results[best_model]['r2_score']) if best_model in results and 'r2_score' in results[best_model] else float(valid_models.get(best_model, -np.inf))
+    return best_model, raw_best_r2
 
 
 def plot_results(x_data: np.ndarray, y_data: np.ndarray, results: Dict[str, Any], 
@@ -342,6 +404,84 @@ def analyze_instance(instance_name: str, save_plot: bool = True) -> Dict[str, An
         print(f"Error analyzing {instance_name}: {e}")
         return {'instance_name': instance_name, 'error': str(e)}
 
+def print_summary(summary_file: str):
+    """
+    Print summary of results from a summary file.
+    """
+    with open(summary_file, 'r') as f:
+        data = json.load(f)
+    
+    def compute_best_from_results(results_dict: Dict[str, Any]) -> Tuple[str, Optional[float]]:
+        valid: Dict[str, float] = {}
+        for model_name, model_info in results_dict.items():
+            if isinstance(model_info, dict) and 'r2_score' in model_info:
+                r2 = model_info.get('r2_score')
+                if r2 is not None and not (isinstance(r2, float) and np.isnan(r2)):
+                    try:
+                        valid[model_name] = float(r2)
+                    except Exception:
+                        continue
+        if not valid:
+            return "None", None
+        # Apply the same tie-breaking preference: linear gets +0.1 bonus
+        selection_scores: Dict[str, float] = {}
+        for model_name, r2 in valid.items():
+            bonus = 0.1 if model_name == 'linear' else 0.0
+            selection_scores[model_name] = r2 + bonus
+        best_model_name = max(selection_scores, key=selection_scores.get)
+        # Return raw R^2 for that best model
+        return best_model_name, valid.get(best_model_name)
+    
+    # Build a compact summary: {instance: {best_model, best_r2_score}}
+    summary_compact: Dict[str, Dict[str, Any]] = {}
+    
+    if isinstance(data, dict):
+        # Expected format: {instance_name: {results: {...}, ...}, ...}
+        for instance_name, entry in data.items():
+            if isinstance(entry, dict) and isinstance(entry.get('results'), dict):
+                best_model, best_r2 = compute_best_from_results(entry['results'])
+            elif isinstance(entry, dict):
+                best_model, best_r2 = compute_best_from_results(entry)
+            else:
+                best_model, best_r2 = "None", None
+            summary_compact[instance_name] = {
+                'best_model': best_model,
+                'best_r2_score': best_r2
+            }
+    elif isinstance(data, list):
+        # Older format: list of per-instance dicts
+        for entry in data:
+            if not isinstance(entry, dict):
+                continue
+            instance_name = entry.get('instance_name') or entry.get('name') or 'unknown'
+            results_dict = entry.get('results', {})
+            if not isinstance(results_dict, dict):
+                results_dict = {}
+            best_model, best_r2 = compute_best_from_results(results_dict)
+            summary_compact[instance_name] = {
+                'best_model': best_model,
+                'best_r2_score': best_r2
+            }
+    else:
+        print("Unrecognized summary file format; nothing to summarize.")
+        summary_compact = {}
+    
+    # Determine output path
+    out_path = summary_file[:-5] + '_summary.json' if summary_file.endswith('.json') else summary_file + '_summary.json'
+    with open(out_path, 'w') as f:
+        json.dump(make_json_serializable(summary_compact), f, indent=2)
+    print(f"Summary saved to: {out_path}")
+    
+    # Also save a CSV version
+    out_csv_path = summary_file[:-5] + '_summary.csv' if summary_file.endswith('.json') else summary_file + '_summary.csv'
+    with open(out_csv_path, 'w', newline='') as fcsv:
+        writer = csv.writer(fcsv)
+        writer.writerow(['instance_name', 'best_model', 'best_r2_score'])
+        for instance_name, info in summary_compact.items():
+            best_model = info.get('best_model', 'None')
+            best_r2 = info.get('best_r2_score', '')
+            writer.writerow([instance_name, best_model, best_r2 if best_r2 is not None else ''])
+    print(f"CSV summary saved to: {out_csv_path}")
 
 def main():
     """Main function to run regression analysis."""
@@ -350,23 +490,27 @@ def main():
     parser.add_argument('--all', '-a', action='store_true', help='Analyze all available instances')
     parser.add_argument('--no-plot', action='store_true', help='Skip plotting and saving plots')
     parser.add_argument('--output', '-o', type=str, help='Output file for results (JSON format)')
-    
+    parser.add_argument('--summary', '-s', type=str, help='Summary file for results')
     args = parser.parse_args()
     
     save_plot = not args.no_plot
-    all_results = []
+    all_results = {}
     
+    if args.summary:
+        print_summary(args.summary)
+        return
+
     if args.instance:
         # Analyze specific instance
         result = analyze_instance(args.instance, save_plot)
-        all_results.append(result)
+        all_results[args.instance] = result
         
     elif args.all:
         # Analyze all instances
         print("Analyzing all available instances...")
         for instance_name in get_all_instance_names():
             result = analyze_instance(instance_name, save_plot)
-            all_results.append(result)
+            all_results[instance_name] = result
             
     else:
         print("Please specify either --instance <name> or --all")
@@ -375,7 +519,7 @@ def main():
     # Save results if output file specified
     if args.output:
         with open(args.output, 'w') as f:
-            json.dump(all_results, f, indent=2)
+            json.dump(make_json_serializable(all_results), f, indent=2)
         print(f"Results saved to: {args.output}")
 
 

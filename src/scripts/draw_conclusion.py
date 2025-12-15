@@ -1,6 +1,6 @@
 import json
-from .paths import get_conclusion_path
-from .category import get_all_instance_names
+from paths import get_conclusion_path
+from category import get_all_instance_names
 import csv
 import os
 

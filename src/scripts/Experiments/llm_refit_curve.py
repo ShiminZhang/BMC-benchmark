@@ -4,8 +4,13 @@ import re
 import math
 from typing import Dict, Any, Tuple, Optional
 
-from ..paths import get_pysr_summary_path, get_analysis_results_path, get_analysis_raw_output_path, get_solving_times_path, get_plot_path, get_conclusion_path
-from ..config import get_config_manager
+from paths import get_pysr_summary_path, get_analysis_results_path, get_analysis_raw_output_path, get_solving_times_path, get_plot_path, get_conclusion_path
+from config import get_config_manager
+import json
+import os
+import re
+import math
+from typing import Dict, Any, Tuple, Optional
 import argparse
 from datetime import datetime
 import numpy as np

@@ -1,11 +1,11 @@
 import os
 import multiprocessing
 import subprocess
-from .GenericRA import LOG, LOG_TAG, TOGGLE_SHOWLOG, REG_TAG
-from .paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path
-from .utils.utils import run_slurm_job_wrap
+from GenericRA import LOG, LOG_TAG, TOGGLE_SHOWLOG, REG_TAG
+from paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path
+from utils.utils import run_slurm_job_wrap
 import argparse
-from .category import get_all_instance_names
+from category import get_all_instance_names
 
 def run_formula(name, K, solver, limit):
     cnf_path = get_cnf_path(name, K)

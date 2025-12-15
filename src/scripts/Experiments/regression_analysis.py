@@ -5,16 +5,16 @@ import json
 import pickle
 import hashlib
 import pysr
-from ..category import get_all_instance_names
-from ..paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path, get_conclusion_path
+from category import get_all_instance_names
+from paths import get_solving_times_dir, get_pysr_results_dir,get_results_dir, get_pysr_results_path, get_pysr_summary_path, get_pysr_cache_path, get_pysr_summary_path, get_sympy_summary_path, get_conclusion_path
 import numpy as np
 import argparse
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-from .llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation,load_original_data,load_regression_equation,load_original_data_with_k, safe_evaluate_equation
-from ..paths import get_plot_path
-from .sympy_analysis import extract_leading_term
+from Experiments.llm_refit_curve import llm_analysis, plot_original_vs_llm_results,llm_conclude_expression,plot_original_vs_equation,load_original_data,load_regression_equation,load_original_data_with_k, safe_evaluate_equation
+from paths import get_plot_path
+from Experiments.sympy_analysis import extract_leading_term
 import multiprocessing
 from multiprocessing import Pool, cpu_count
 import time
@@ -85,7 +85,7 @@ def save_model_to_cache(model, name, data_hash=None):
 
 def clear_cache(name=None):
     """Clear cached models. If name is None, clear all cache."""
-    from ..paths import get_pysr_cache_dir
+    from paths import get_pysr_cache_dir
     import glob
     
     cache_dir = get_pysr_cache_dir()
