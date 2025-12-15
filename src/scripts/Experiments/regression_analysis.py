@@ -542,6 +542,7 @@ def run_pysr_and_plot(name, use_cache=False, config_type="auto"):
     single_plot_path = plot_original_vs_equation_with_data(name, "fitted", equations, 
                                                            x_filtered, y_filtered, label="pysr_plot")
     
+    return single_plot_path, None
     if single_plot_path:
         print(f"✅ Single plot saved successfully")
     else:
@@ -853,7 +854,7 @@ def main():
         run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot)
     elif args.pysr_plot_manage:
         # Build the command for sbatch
-        activate_python = "source ../general/bin/activate"
+        activate_python = "source ../../general/bin/activate"
         interested_names = get_all_instance_names()
         interested_names = sorted(list(interested_names))
         for name in interested_names:

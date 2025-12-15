@@ -669,6 +669,27 @@ def load_original_data(instance_name):
     return np.array(x_data), np.array(y_data)
 
 
+def load_original_data_with_k(instance_name):
+    """Load original data points including k values from solving times JSON"""
+    solving_times_path = get_solving_times_path(instance_name)
+    
+    if not os.path.exists(solving_times_path):
+        raise FileNotFoundError(f"Solving times file not found: {solving_times_path}")
+    
+    try:
+        with open(solving_times_path, 'r') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        raise ValueError(f"Failed to load solving times from {solving_times_path}: {e}")
+    
+    # Extract k values (keys), CNF sizes, and solving times
+    k_data = [float(k) for k in data.keys()]
+    x_data = [float(v["size_of_cnf"]) for v in data.values()]
+    y_data = [float(v["solving_time"]) for v in data.values()]
+    
+    return np.array(k_data), np.array(x_data), np.array(y_data)
+
+
 def load_llm_analysis(instance_name):
     """Load LLM analysis results"""
     analysis_path = get_analysis_results_path(instance_name)
@@ -815,6 +836,95 @@ def plot_original_vs_equation(instance_name, type_of_equation: str, equations : 
     figure_path = figure_path.replace(".png", f"_{label}.png")
     plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"Plot saved to: {figure_path}")
+    plt.close()
+    
+    return figure_path
+
+
+def plot_dual_comparison(instance_name, type_of_equation: str, equations: Dict[str, str], label=""):
+    """
+    Plot comparison with two subplots: left shows CNF size, right shows k value
+    
+    Args:
+        instance_name: Name of the instance
+        type_of_equation: Type of the equation (e.g., "fitted", "linear", "exponential")
+        equations: Dictionary of equation names to equation strings
+        label: Label to append to filename
+    
+    Returns:
+        Path to the saved plot
+    """
+    # Load data with k values
+    k_data, x_data, y_data = load_original_data_with_k(instance_name)
+    
+    # Create figure with two subplots side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
+    
+    print(f"Plotting dual comparison for {instance_name}")
+    print(f"Equations: {equations}")
+    
+    # ========== LEFT SUBPLOT: CNF Size vs Solving Time ==========
+    ax1.scatter(x_data, y_data, color='black', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    
+    # Plot equations on left subplot
+    for key, equation in equations.items():
+        print(f"Plotting equation {key}: {equation}")
+        x_plot = np.linspace(x_data.min(), x_data.max(), 1000)
+        y_equation = safe_evaluate_equation(equation, x_plot)
+        
+        # Create unique label for each equation
+        equation_label = f"{key}: {equation[:50]}..." if len(equation) > 50 else f"{key}: {equation}"
+        ax1.plot(x_plot, y_equation, linewidth=2, label=equation_label, alpha=0.8)
+    
+    ax1.set_xlabel('Number of clauses in CNF formula', fontsize=12)
+    ax1.set_ylabel('Solving Time (seconds)', fontsize=12)
+    ax1.set_title(f'CNF Size vs Solving Time\nInstance: {instance_name}', fontsize=14)
+    ax1.legend(fontsize=9, loc='best')
+    ax1.grid(True, alpha=0.3)
+    
+    # ========== RIGHT SUBPLOT: K Value vs Solving Time ==========
+    ax2.scatter(k_data, y_data, color='blue', alpha=0.7, s=50, 
+               label='Original Data', zorder=5)
+    
+    # Plot equations on right subplot (using k_data range)
+    for key, equation in equations.items():
+        k_plot = np.linspace(k_data.min(), k_data.max(), 1000)
+        # We need to substitute k values into the equation
+        # Since the equation is in terms of x0 (CNF size), we need to convert
+        # For now, we'll plot a fitted line through the k-y_data points
+        
+        # Simple polynomial fit for k vs y
+        try:
+            # Fit a polynomial to k_data and y_data
+            poly_degree = min(3, len(k_data) - 1)
+            if poly_degree >= 1:
+                coeffs = np.polyfit(k_data, y_data, poly_degree)
+                y_k_fit = np.polyval(coeffs, k_plot)
+                
+                equation_label = f"{key} (k-based fit)"
+                ax2.plot(k_plot, y_k_fit, linewidth=2, label=equation_label, alpha=0.8)
+        except Exception as e:
+            print(f"Could not fit k-based curve: {e}")
+    
+    ax2.set_xlabel('K (Unrolling Depth)', fontsize=12)
+    ax2.set_ylabel('Solving Time (seconds)', fontsize=12)
+    ax2.set_title(f'K Value vs Solving Time\nInstance: {instance_name}', fontsize=14)
+    ax2.legend(fontsize=9, loc='best')
+    ax2.grid(True, alpha=0.3)
+    
+    # Add overall title
+    type_of_equation_label = f"Growth type: {type_of_equation}"
+    fig.suptitle(f'Dual Comparison: {type_of_equation_label}', fontsize=16, y=0.98)
+    
+    # Save to dual_plots directory
+    from ..paths import get_results_dir
+    dual_plots_dir = os.path.join(get_results_dir(), "dual_plots")
+    os.makedirs(dual_plots_dir, exist_ok=True)
+    
+    figure_path = os.path.join(dual_plots_dir, f"{instance_name}_dual_{label}.png")
+    plt.savefig(figure_path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"Dual plot saved to: {figure_path}")
     plt.close()
     
     return figure_path
