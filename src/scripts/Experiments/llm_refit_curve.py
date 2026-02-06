@@ -674,7 +674,7 @@ def load_original_data(instance_name):
     return np.array(x_data), np.array(y_data)
 
 
-def load_original_data_with_k(instance_name):
+def load_original_data_with_k(instance_name, ignore_sat=True):
     """Load original data points including k values from solving times JSON"""
     solving_times_path = get_solving_times_path(instance_name)
     
@@ -687,12 +687,38 @@ def load_original_data_with_k(instance_name):
     except (json.JSONDecodeError, FileNotFoundError) as e:
         raise ValueError(f"Failed to load solving times from {solving_times_path}: {e}")
     
+    # Helper to robustly interpret 'is_unsat' which may be bool or string
+    def is_unsat_value(v):
+        raw = v.get("is_unsat", False)
+        if isinstance(raw, bool):
+            return raw
+        if isinstance(raw, (int, float)):
+            return bool(raw)
+        if isinstance(raw, str):
+            s = raw.strip().lower()
+            if s in ("true", "1", "yes", "y", "t"):
+                return True
+            if s in ("false", "0", "no", "n", "f", ""):
+                return False
+        # Fallback: treat unknown as False (usable point)
+        return False
+
     # Extract k values (keys), CNF sizes, and solving times
-    k_data = [float(k) for k in data.keys()]
-    x_data = [float(v["size_of_cnf"]) for v in data.values()]
-    y_data = [float(v["solving_time"]) for v in data.values()]
-    
-    return np.array(k_data), np.array(x_data), np.array(y_data)
+    k_list = []
+    x_list = []
+    y_list = []
+    for k_str, v in data.items():
+        # Respect ignore_unsat flag; default missing flag to False (treat as SAT/data-usable)
+        if ignore_sat and not is_unsat_value(v):
+            continue
+        try:
+            k_list.append(float(k_str))
+            x_list.append(float(v["size_of_cnf"]))
+            y_list.append(float(v["solving_time"]))
+        except KeyError:
+            # Skip entries missing required fields
+            continue
+    return np.array(k_list), np.array(x_list), np.array(y_list)
 
 
 def load_llm_analysis(instance_name):

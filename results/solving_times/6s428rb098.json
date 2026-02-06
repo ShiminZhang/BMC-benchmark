@@ -1,26 +1,38 @@
 {
     "1": {
-        "solving_time": 0.04,
-        "size_of_cnf": 150710
+        "solving_time": 0.02,
+        "size_of_cnf": 150710,
+        "is_unsat": true,
+        "nvar": 59524
     },
     "2": {
-        "solving_time": 0.08,
-        "size_of_cnf": 224171
+        "solving_time": 0.05,
+        "size_of_cnf": 224171,
+        "is_unsat": true,
+        "nvar": 85762
     },
     "3": {
-        "solving_time": 0.26,
-        "size_of_cnf": 297632
+        "solving_time": 0.21,
+        "size_of_cnf": 297632,
+        "is_unsat": true,
+        "nvar": 112000
     },
     "4": {
-        "solving_time": 3.25,
-        "size_of_cnf": 371093
+        "solving_time": 2.46,
+        "size_of_cnf": 371093,
+        "is_unsat": true,
+        "nvar": 138238
     },
     "5": {
-        "solving_time": 45.9,
-        "size_of_cnf": 444554
+        "solving_time": 36.22,
+        "size_of_cnf": 444554,
+        "is_unsat": true,
+        "nvar": 164476
     },
     "6": {
-        "solving_time": 633.12,
-        "size_of_cnf": 518015
+        "solving_time": 343.65,
+        "size_of_cnf": 518015,
+        "is_unsat": true,
+        "nvar": 190714
     }
 }

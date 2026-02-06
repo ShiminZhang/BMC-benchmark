@@ -137,6 +137,8 @@ def GetDataFromLog(log_path):
         line = b''
         linecnt=0
         phase=0 # 0 for time, 1 for mem
+        is_unsat = False
+        solving_time = None
         while position >= 0 and linecnt <= 500:        
             file.seek(position)
             char = file.read(1)
@@ -148,22 +150,30 @@ def GetDataFromLog(log_path):
                     continue
                 if "mylog" in decoded_line:
                     continue
-
+                # detect UNSAT/SAT markers and common exit codes (20=UNSAT, 10=SAT)
+                if "s UNSATISFIABLE" in decoded_line or re.search(r'\bUNSATISFIABLE\b', decoded_line):
+                    is_unsat = True
+                elif re.search(r'\bexit\s+20\b', decoded_line):
+                    is_unsat = True
+                elif re.search(r'\bexit\s+10\b', decoded_line):
+                    is_unsat = False
                 if "process-time" in decoded_line or "total process time" in decoded_line:
                     match = re.search(r'(\d+\.?\d*)\s+seconds', decoded_line) or re.search(r'total process time[^:]*:\s*([0-9]+(?:\.[0-9]+)?)\s*seconds', decoded_line)
                     if match:
                         # print(basename)
                         time = float(match.group(1))
-                        return time
+                        return time, is_unsat
                     
-                if "CPU time" in decoded_line in decoded_line:
+                if "CPU time" in decoded_line:
                     match = re.search(r'CPU time[^:]*:\s*([0-9]+(?:\.[0-9]+)?)\s*s', decoded_line)
                     if match:
                         # print(basename)
                         time = float(match.group(1))
-                        return time
+                        solving_time = time
                 line = b''
             else:
                 line = char + line
             position -= 1
-    return None
+    if solving_time is not None:
+        return solving_time, is_unsat
+    return None, is_unsat

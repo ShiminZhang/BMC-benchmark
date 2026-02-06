@@ -1,46 +1,68 @@
 {
     "1": {
         "solving_time": 0.0,
-        "size_of_cnf": 11260
+        "size_of_cnf": 11260,
+        "is_unsat": true,
+        "nvar": 4050
     },
     "2": {
-        "solving_time": 0.01,
-        "size_of_cnf": 16844
+        "solving_time": 0.0,
+        "size_of_cnf": 16844,
+        "is_unsat": true,
+        "nvar": 6028
     },
     "3": {
-        "solving_time": 0.03,
-        "size_of_cnf": 22428
+        "solving_time": 0.02,
+        "size_of_cnf": 22428,
+        "is_unsat": true,
+        "nvar": 8006
     },
     "4": {
-        "solving_time": 0.29,
-        "size_of_cnf": 28012
+        "solving_time": 0.2,
+        "size_of_cnf": 28012,
+        "is_unsat": true,
+        "nvar": 9984
     },
     "5": {
-        "solving_time": 1.27,
-        "size_of_cnf": 33596
+        "solving_time": 0.94,
+        "size_of_cnf": 33596,
+        "is_unsat": true,
+        "nvar": 11962
     },
     "6": {
-        "solving_time": 5.69,
-        "size_of_cnf": 39180
+        "solving_time": 4.37,
+        "size_of_cnf": 39180,
+        "is_unsat": true,
+        "nvar": 13940
     },
     "7": {
-        "solving_time": 23.43,
-        "size_of_cnf": 44764
+        "solving_time": 19.28,
+        "size_of_cnf": 44764,
+        "is_unsat": true,
+        "nvar": 15918
     },
     "8": {
-        "solving_time": 78.94,
-        "size_of_cnf": 50348
+        "solving_time": 70.85,
+        "size_of_cnf": 50348,
+        "is_unsat": true,
+        "nvar": 17896
     },
     "9": {
-        "solving_time": 153.45,
-        "size_of_cnf": 55932
+        "solving_time": 143.24,
+        "size_of_cnf": 55932,
+        "is_unsat": true,
+        "nvar": 19874
     },
     "10": {
-        "solving_time": 598.99,
-        "size_of_cnf": 61516
+        "solving_time": 562.22,
+        "size_of_cnf": 61516,
+        "is_unsat": true,
+        "nvar": 21852
     },
     "11": {
-        "solving_time": 938.98,
-        "size_of_cnf": 67100
+        "solving_time": 973.96,
+        "size_of_cnf": 67100,
+        "is_unsat": true,
+        "nvar": 23830
     }
 }

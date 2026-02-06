@@ -15,9 +15,9 @@ from scipy.optimize import curve_fit
 from sklearn.metrics import r2_score
 from typing import Tuple, Dict, Any, Optional
 from regression_analysis import load_original_data_with_k,filter_k_step_data
-from paths import get_solving_times_path, get_plots_dir
+from paths import get_solving_times_path, get_plots_dir, get_prepare_formulas_log
 from category import get_all_instance_names
-
+BONUS_LINEAR = 0.05
 
 def make_json_serializable(obj):
     """
@@ -52,10 +52,24 @@ def load_solving_data(instance_name: str) -> Tuple[np.ndarray, np.ndarray]:
     y_knots = y_running_max[change_idxs].astype(float)
 
 
-    # 最后一段插值到 1600（若已超过则不降低）
+    # # 最后一段插值到 1600（若已超过则不降低）
     if len(x_data) < 100:
-        if y_knots.size > 0 and y_knots[-1] < 1600.0:
-            y_knots[-1] = 1600.0
+        # 检查log，是否是因为timeout才不满100个dp
+        log_path = get_prepare_formulas_log(instance_name)
+        disk_quota_exceeded = False
+        failed_to_scale = False
+        with open(log_path, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                if "timed out after 1600 seconds" in line:
+                    y_knots[-1] = 1600.0
+                    break
+                # if "Disk quota exceeded" in line:
+                #     disk_quota_exceeded = True
+                # if failed_to_scale and disk_quota_exceeded:
+                #     break
+        # if failed_to_scale and not disk_quota_exceeded:
+        #     y_knots[-1] = 1600.0
 
     # 去除可能的重复 x 结点，避免 np.interp 报错
     x_knots_unique, unique_idx = np.unique(x_knots, return_index=True)
@@ -272,7 +286,7 @@ def find_best_model(results: Dict[str, Any]) -> Tuple[str, float]:
     selection_scores: Dict[str, float] = {}
     for model_name, r2 in valid_models.items():
         try:
-            bonus = 0.1 if model_name == 'linear' else 0.0
+            bonus = BONUS_LINEAR if model_name == 'linear' else 0.0
             selection_scores[model_name] = float(r2) + bonus
         except Exception:
             continue
@@ -331,7 +345,7 @@ def plot_results(x_data: np.ndarray, y_data: np.ndarray, results: Dict[str, Any]
         plot_path = os.path.join(plots_dir, f"{instance_name}_regression_analysis.png")
         plt.savefig(plot_path, dpi=300, bbox_inches='tight')
         print(f"Plot saved to: {plot_path}")
-    
+    plt.close()
     # plt.show()
 
 
@@ -379,7 +393,25 @@ def analyze_instance(instance_name: str, save_plot: bool = True) -> Dict[str, An
         # Load data
         x_data, y_data = load_solving_data(instance_name)
         print(f"Loaded {len(x_data)} data points")
-        
+        if len(x_data) < 5:
+            return {
+                'instance_name': instance_name,
+                'data_points': len(x_data),
+                'results': {
+                    'linear': {
+                        'r2_score': -1
+                    },
+                    'polynomial': {
+                        'r2_score': -1
+                    },
+                    'exponential': {
+                        'r2_score': -1
+                    }
+                },
+                'best_model': 'unknown',
+                'best_r2_score': -1
+            }
+            
         # Fit models
         results = fit_models(x_data, y_data)
         
@@ -426,7 +458,7 @@ def print_summary(summary_file: str):
         # Apply the same tie-breaking preference: linear gets +0.1 bonus
         selection_scores: Dict[str, float] = {}
         for model_name, r2 in valid.items():
-            bonus = 0.1 if model_name == 'linear' else 0.0
+            bonus = BONUS_LINEAR if model_name == 'linear' else 0.0
             selection_scores[model_name] = r2 + bonus
         best_model_name = max(selection_scores, key=selection_scores.get)
         # Return raw R^2 for that best model
@@ -490,7 +522,7 @@ def main():
     parser.add_argument('--all', '-a', action='store_true', help='Analyze all available instances')
     parser.add_argument('--no-plot', action='store_true', help='Skip plotting and saving plots')
     parser.add_argument('--output', '-o', type=str, help='Output file for results (JSON format)')
-    parser.add_argument('--summary', '-s', type=str, help='Summary file for results')
+    parser.add_argument('--summary', '-s', type=str,default="regression.json", help='Summary file for results')
     args = parser.parse_args()
     
     save_plot = not args.no_plot

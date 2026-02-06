@@ -72,9 +72,9 @@ def compute_recommended_k(instance_name: str, best_model: str) -> int:
     ks, ts = load_solving_series(instance_name)
     k_local = first_local_max_k(ks, ts)
     if k_local is not None:
-        return k_local
+        return max(5, k_local)
     k_gt1 = first_k_with_time_gt(ks, ts, 1.0)
-    return k_gt1 if k_gt1 is not None else -1
+    return max(5, k_gt1) if k_gt1 is not None else -1
 
 
 def infer_best_model(entry: Dict[str, Any]) -> Optional[str]:

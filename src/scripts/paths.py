@@ -24,6 +24,9 @@ def get_solving_log_dir():
         os.makedirs(dir)
     return dir
 
+def get_prepare_formulas_log(name):
+    return f"./logs/prepare_formulas/{name}_500.log"
+
 def get_solving_log_path(name, K):
     dir = f"./results/solving_logs/{name}/"
     if not os.path.exists(dir):

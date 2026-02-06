@@ -1,46 +1,62 @@
 {
     "1": {
-        "solving_time": 0.49,
-        "size_of_cnf": 137220
+        "solving_time": 0.36,
+        "size_of_cnf": 137220,
+        "is_unsat": true,
+        "nvar": 48769
     },
     "2": {
-        "solving_time": 0.9,
-        "size_of_cnf": 205501
+        "solving_time": 0.67,
+        "size_of_cnf": 205501,
+        "is_unsat": true,
+        "nvar": 72811
     },
     "3": {
-        "solving_time": 2.15,
-        "size_of_cnf": 273782
+        "solving_time": 1.67,
+        "size_of_cnf": 273782,
+        "is_unsat": true,
+        "nvar": 96853
     },
     "4": {
-        "solving_time": 8.27,
-        "size_of_cnf": 342063
+        "solving_time": 6.49,
+        "size_of_cnf": 342063,
+        "is_unsat": true,
+        "nvar": 120895
     },
     "5": {
-        "solving_time": 34.87,
-        "size_of_cnf": 410344
+        "solving_time": 28.25,
+        "size_of_cnf": 410344,
+        "is_unsat": true,
+        "nvar": 144937
     },
     "6": {
-        "solving_time": 158.05,
-        "size_of_cnf": 478625
+        "solving_time": 139.93,
+        "size_of_cnf": 478625,
+        "is_unsat": true,
+        "nvar": 168979
     },
     "7": {
-        "solving_time": 335.96,
-        "size_of_cnf": 546906
+        "solving_time": 314.14,
+        "size_of_cnf": 546906,
+        "is_unsat": true,
+        "nvar": 193021
     },
     "8": {
-        "solving_time": 847.33,
-        "size_of_cnf": 615187
+        "solving_time": 762.69,
+        "size_of_cnf": 615187,
+        "is_unsat": true,
+        "nvar": 217063
     },
     "9": {
-        "solving_time": 1028.25,
-        "size_of_cnf": 683468
+        "solving_time": 951.96,
+        "size_of_cnf": 683468,
+        "is_unsat": true,
+        "nvar": 241105
     },
     "10": {
-        "solving_time": 1270.27,
-        "size_of_cnf": 751749
-    },
-    "11": {
-        "solving_time": 1710.85,
-        "size_of_cnf": 820030
+        "solving_time": 1144.87,
+        "size_of_cnf": 751749,
+        "is_unsat": true,
+        "nvar": 265147
     }
 }

@@ -1,8 +1,9 @@
 import os
+import json
 import multiprocessing
 import subprocess
 from GenericRA import LOG, LOG_TAG, TOGGLE_SHOWLOG, REG_TAG
-from paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path
+from paths import get_cnf_path, get_cnf_per_instance_dir, get_aig_dir, get_solving_log_path, get_solving_times_path
 from utils.utils import run_slurm_job_wrap
 import argparse
 from category import get_all_instance_names
@@ -38,10 +39,10 @@ def run_formula(name, K, solver, limit):
         return False
     
 
-def generate_cnf(name, K):
+def generate_cnf(name, K, force=False):
     LOG(f"Generating formula {name} with K={K}")
     cnf_path = get_cnf_path(name, K)
-    if os.path.exists(cnf_path): # TODO check if the cnf is valid
+    if os.path.exists(cnf_path) and not force: # TODO check if the cnf is valid
         return True
     cnf_per_instance_dir = get_cnf_per_instance_dir(name)
     aig_dir = get_aig_dir()
@@ -51,6 +52,22 @@ def generate_cnf(name, K):
         return True
     else:
         return False
+
+def restore_cnf_for_name(name):
+    TOGGLE_SHOWLOG(True)
+    solving_time_path = get_solving_times_path(name)
+    if not os.path.exists(solving_time_path):
+        LOG(f"solving time json not found for {name}: {solving_time_path}")
+        return False
+    with open(solving_time_path, "r") as f:
+        data = json.load(f)
+    ks = sorted([int(k) for k in data.keys()])
+    LOG(f"Restoring CNF for {name} with {len(ks)} Ks")
+    for k in ks:
+        if not generate_cnf(name, k, force=True):
+            LOG(f"Failed to regenerate CNF for {name} with K={k}")
+            return False
+    return True
 
 def generate_and_run_up_to_limit(name, solver, time_limit, k_limit, step = 10):
     LOG(f"Generating and running {name} with K<={k_limit} up to limit {time_limit}")
@@ -79,6 +96,7 @@ def main():
     parser.add_argument("--step", type=int, default=1, required=False)
     parser.add_argument("--manage", action="store_true", required=False)
     parser.add_argument("--clear", action="store_true", required=False)
+    parser.add_argument("--restore_cnf", action="store_true", required=False)
     args = parser.parse_args()
     # insufficent_names = ['picorv32_mutCY_nomem-p3', 'oski15a01b70s', '6s207rb28', 'beemlann2f1', 'pdtvisns3p02', 'cal123', '6s0', '6s428rb098', 'oski15a01b51s', 'pdtpmscoherence', 'cal118', 'cal143', 'beemlifts2b1', 'arbitrated_top_n3_w16_d128_e0', 'shift_register_top_w16_d64_e0', '6s13', '6s38', 'beemandrsn4b1', 'oski15a01b41s', 'arbitrated_top_n3_w8_d128_e0', 'oski15a01b03s', 'cal176', '6s404rb4', '6s357r', 'intel066', 'cal149', 'oski15a08b15s', 'oski15a08b03s', 'cal81', 'oski15a08b14s', 'oski15a01b59s', 'cal86', '6s31', 'oski15a01b02s', '6s350rb46', '6s350rb35', 'cal129', 'oski15a08b05s', 'cal34', 'picorv32_mutBY_nomem-p7', '6s320rb0', 'cal102', 'cal106', 'cal112', 'cal33', 'shift_register_top_w16_d16_e0']
     if args.manage:
@@ -87,10 +105,17 @@ def main():
         log_dir = "./logs/prepare_formulas/"
         os.makedirs(log_dir, exist_ok=True)
         for name in interested_names:
-            run_slurm_job_wrap(
-                f"python -m src.scripts.prepare_formulas --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit} --step {args.step}",
-                f"{log_dir}/{name}_{args.k_limit}.log",
-                f"pf_{name}_{args.k_limit}", mem="16g", time="20:00:00"
+            if args.restore_cnf:
+                run_slurm_job_wrap(
+                    f"python -m src.scripts.prepare_formulas --name {name} --restore_cnf",
+                    f"{log_dir}/{name}_restore_cnf.log",
+                    f"pf_restore_{name}", mem="16g", time="5:00:00"
+                )
+            else:
+                run_slurm_job_wrap(
+                    f"python -m src.scripts.prepare_formulas --name {name} --time_limit {args.time_limit} --k_limit {args.k_limit} --step {args.step}",
+                    f"{log_dir}/{name}_{args.k_limit}.log",
+                    f"pf_{name}_{args.k_limit}", mem="16g", time="20:00:00"
                 )
     else:
         if args.clear:
@@ -98,7 +123,10 @@ def main():
             for file in os.listdir(cnf_per_instance_dir):
                 os.remove(os.path.join(cnf_per_instance_dir, file))
         else:
-            prepare_single(args.name, args.time_limit, args.k_limit, args.step)
+            if args.restore_cnf:
+                restore_cnf_for_name(args.name)
+            else:
+                prepare_single(args.name, args.time_limit, args.k_limit, args.step)
     # prepare_single("6s0", 1600, 100)
 
 if __name__ == "__main__":
