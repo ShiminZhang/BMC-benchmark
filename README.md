@@ -11,7 +11,7 @@ Classify BMC instances as **linear**, **polynomial**, or **exponential** in solv
 python prepare_formulas.py --name <instance> --k_limit 500 --time_limit 1600
 ```
 
-**2. Collect solving times** — run CaDiCaL on the generated CNFs and record wall-clock solving time per depth (timeout: 1600 s).
+**2. Collect solving times** — run CaDiCaL on the generated CNFs and record solving time per depth (timeout: 1600 s).
 ```bash
 python Experiments/collect_solving_time.py --all
 ```
