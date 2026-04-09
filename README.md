@@ -11,9 +11,9 @@ From the repository root, set the import path once:
 export PYTHONPATH=src/scripts
 ```
 
-**1. Generate CNFs** — unroll each BMC circuit to depths K = 1…500 and write one CNF per depth.
+**1. Generate CNFs** — unroll each BMC circuit to depths K = 1…100 and write one CNF per depth.
 ```bash
-python src/scripts/prepare_formulas.py --name <instance> --k_limit 500 --time_limit 1600
+python src/scripts/prepare_formulas.py --name <instance> --k_limit 100 --time_limit 1600
 ```
 
 **2. Collect solving times** — run CaDiCaL on the generated CNFs and record solving time per depth (timeout: 1600 s).
