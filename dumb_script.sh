@@ -4,7 +4,7 @@
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=1
 #SBATCH --output=./dumb_script_%j.log
-# source ../../general/bin/activate
 # source .env
+# source $PYENVPATH
 # python src/scripts/Experiments/direct_regression_analysis.py --all --output regression.json 
 git add -A; git commit -m "Update"; git push

@@ -854,7 +854,7 @@ def main():
         run_pysr_and_conclude_with_llm(args.instance_name, args.use_cache, args.config, args.plot)
     elif args.pysr_plot_manage:
         # Build the command for sbatch
-        activate_python = "source ../../general/bin/activate"
+        activate_python = "source .env; source $PYENVPATH"
         interested_names = get_all_instance_names()
         interested_names = sorted(list(interested_names))
         for name in interested_names:
