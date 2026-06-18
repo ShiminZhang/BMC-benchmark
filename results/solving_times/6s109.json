@@ -25,12 +25,12 @@
         "is_unsat": true
     },
     "6": {
-        "solving_time": 0.07,
+        "solving_time": 0.08,
         "size_of_cnf": 191191,
         "is_unsat": true
     },
     "7": {
-        "solving_time": 0.15,
+        "solving_time": 0.13,
         "size_of_cnf": 218456,
         "is_unsat": true
     },
@@ -40,98 +40,318 @@
         "is_unsat": true
     },
     "9": {
-        "solving_time": 0.37,
+        "solving_time": 0.35,
         "size_of_cnf": 272986,
         "is_unsat": true
     },
     "10": {
-        "solving_time": 0.86,
+        "solving_time": 0.77,
         "size_of_cnf": 300251,
         "is_unsat": true
     },
     "11": {
-        "solving_time": 2.22,
+        "solving_time": 2.85,
         "size_of_cnf": 327516,
         "is_unsat": true
     },
     "12": {
-        "solving_time": 1.95,
+        "solving_time": 2.16,
         "size_of_cnf": 354781,
         "is_unsat": true
     },
     "13": {
-        "solving_time": 3.67,
+        "solving_time": 3.94,
         "size_of_cnf": 382046,
         "is_unsat": true
     },
     "14": {
-        "solving_time": 4.94,
+        "solving_time": 7.45,
         "size_of_cnf": 409311,
         "is_unsat": true
     },
     "15": {
-        "solving_time": 7.55,
+        "solving_time": 6.67,
         "size_of_cnf": 436576,
         "is_unsat": true
     },
     "16": {
-        "solving_time": 8.16,
+        "solving_time": 10.66,
         "size_of_cnf": 463841,
         "is_unsat": true
     },
     "17": {
-        "solving_time": 21.48,
+        "solving_time": 23.87,
         "size_of_cnf": 491106,
         "is_unsat": true
     },
     "18": {
-        "solving_time": 27.67,
+        "solving_time": 45.48,
         "size_of_cnf": 518371,
         "is_unsat": true
     },
     "19": {
-        "solving_time": 65.41,
+        "solving_time": 59.57,
         "size_of_cnf": 545636,
         "is_unsat": true
     },
     "20": {
-        "solving_time": 131.26,
+        "solving_time": 125.57,
         "size_of_cnf": 572901,
         "is_unsat": true
     },
     "21": {
-        "solving_time": 229.91,
+        "solving_time": 222.32,
         "size_of_cnf": 600166,
         "is_unsat": true
     },
     "22": {
-        "solving_time": 334.25,
+        "solving_time": 351.39,
         "size_of_cnf": 627431,
         "is_unsat": true
     },
     "23": {
-        "solving_time": 452.83,
+        "solving_time": 558.99,
         "size_of_cnf": 654696,
         "is_unsat": true
     },
     "24": {
-        "solving_time": 726.97,
+        "solving_time": 886.42,
         "size_of_cnf": 681961,
         "is_unsat": true
     },
     "25": {
-        "solving_time": 1037.47,
+        "solving_time": 1486.51,
         "size_of_cnf": 709226,
         "is_unsat": true
     },
     "26": {
-        "solving_time": 1247.08,
+        "solving_time": 1593.79,
         "size_of_cnf": 736491,
-        "is_unsat": true
+        "is_unsat": false
     },
     "27": {
-        "solving_time": 1462.7,
+        "solving_time": 1593.59,
         "size_of_cnf": 763756,
-        "is_unsat": true
+        "is_unsat": false
+    },
+    "29": {
+        "solving_time": 1593.31,
+        "size_of_cnf": 818286,
+        "is_unsat": false
+    },
+    "30": {
+        "solving_time": 1554.64,
+        "size_of_cnf": 845551,
+        "is_unsat": false
+    },
+    "31": {
+        "solving_time": 1592.86,
+        "size_of_cnf": 872816,
+        "is_unsat": false
+    },
+    "32": {
+        "solving_time": 1592.33,
+        "size_of_cnf": 900081,
+        "is_unsat": false
+    },
+    "33": {
+        "solving_time": 1594.01,
+        "size_of_cnf": 927346,
+        "is_unsat": false
+    },
+    "34": {
+        "solving_time": 1594.05,
+        "size_of_cnf": 954611,
+        "is_unsat": false
+    },
+    "35": {
+        "solving_time": 1593.62,
+        "size_of_cnf": 981876,
+        "is_unsat": false
+    },
+    "36": {
+        "solving_time": 1593.77,
+        "size_of_cnf": 1009141,
+        "is_unsat": false
+    },
+    "37": {
+        "solving_time": 1593.08,
+        "size_of_cnf": 1036406,
+        "is_unsat": false
+    },
+    "38": {
+        "solving_time": 1593.47,
+        "size_of_cnf": 1063671,
+        "is_unsat": false
+    },
+    "39": {
+        "solving_time": 1593.32,
+        "size_of_cnf": 1090936,
+        "is_unsat": false
+    },
+    "40": {
+        "solving_time": 1593.28,
+        "size_of_cnf": 1118201,
+        "is_unsat": false
+    },
+    "41": {
+        "solving_time": 1593.36,
+        "size_of_cnf": 1145466,
+        "is_unsat": false
+    },
+    "42": {
+        "solving_time": 1593.45,
+        "size_of_cnf": 1172731,
+        "is_unsat": false
+    },
+    "43": {
+        "solving_time": 1593.57,
+        "size_of_cnf": 1199996,
+        "is_unsat": false
+    },
+    "44": {
+        "solving_time": 1593.59,
+        "size_of_cnf": 1227261,
+        "is_unsat": false
+    },
+    "45": {
+        "solving_time": 1593.65,
+        "size_of_cnf": 1254526,
+        "is_unsat": false
+    },
+    "46": {
+        "solving_time": 1593.72,
+        "size_of_cnf": 1281791,
+        "is_unsat": false
+    },
+    "47": {
+        "solving_time": 1593.84,
+        "size_of_cnf": 1309056,
+        "is_unsat": false
+    },
+    "48": {
+        "solving_time": 1593.79,
+        "size_of_cnf": 1336321,
+        "is_unsat": false
+    },
+    "49": {
+        "solving_time": 1593.32,
+        "size_of_cnf": 1363586,
+        "is_unsat": false
+    },
+    "50": {
+        "solving_time": 1593.57,
+        "size_of_cnf": 1390851,
+        "is_unsat": false
+    },
+    "51": {
+        "solving_time": 1593.88,
+        "size_of_cnf": 1418116,
+        "is_unsat": false
+    },
+    "52": {
+        "solving_time": 1593.83,
+        "size_of_cnf": 1445381,
+        "is_unsat": false
+    },
+    "53": {
+        "solving_time": 1593.76,
+        "size_of_cnf": 1472646,
+        "is_unsat": false
+    },
+    "54": {
+        "solving_time": 1593.37,
+        "size_of_cnf": 1499911,
+        "is_unsat": false
+    },
+    "55": {
+        "solving_time": 1593.36,
+        "size_of_cnf": 1527176,
+        "is_unsat": false
+    },
+    "56": {
+        "solving_time": 1593.55,
+        "size_of_cnf": 1554441,
+        "is_unsat": false
+    },
+    "57": {
+        "solving_time": 1592.72,
+        "size_of_cnf": 1581706,
+        "is_unsat": false
+    },
+    "58": {
+        "solving_time": 1592.68,
+        "size_of_cnf": 1608971,
+        "is_unsat": false
+    },
+    "59": {
+        "solving_time": 1592.94,
+        "size_of_cnf": 1636236,
+        "is_unsat": false
+    },
+    "60": {
+        "solving_time": 1592.06,
+        "size_of_cnf": 1663501,
+        "is_unsat": false
+    },
+    "61": {
+        "solving_time": 1591.41,
+        "size_of_cnf": 1690766,
+        "is_unsat": false
+    },
+    "62": {
+        "solving_time": 1590.96,
+        "size_of_cnf": 1718031,
+        "is_unsat": false
+    },
+    "63": {
+        "solving_time": 1590.77,
+        "size_of_cnf": 1745296,
+        "is_unsat": false
+    },
+    "64": {
+        "solving_time": 1592.07,
+        "size_of_cnf": 1772561,
+        "is_unsat": false
+    },
+    "65": {
+        "solving_time": 1592.58,
+        "size_of_cnf": 1799826,
+        "is_unsat": false
+    },
+    "66": {
+        "solving_time": 1591.99,
+        "size_of_cnf": 1827091,
+        "is_unsat": false
+    },
+    "67": {
+        "solving_time": 1592.22,
+        "size_of_cnf": 1854356,
+        "is_unsat": false
+    },
+    "68": {
+        "solving_time": 1592.58,
+        "size_of_cnf": 1881621,
+        "is_unsat": false
+    },
+    "69": {
+        "solving_time": 1550.95,
+        "size_of_cnf": 1908886,
+        "is_unsat": false
+    },
+    "70": {
+        "solving_time": 1589.49,
+        "size_of_cnf": 1936151,
+        "is_unsat": false
+    },
+    "71": {
+        "solving_time": 1590.81,
+        "size_of_cnf": 1963416,
+        "is_unsat": false
+    },
+    "72": {
+        "solving_time": 1590.83,
+        "size_of_cnf": 1990681,
+        "is_unsat": false
     }
 }

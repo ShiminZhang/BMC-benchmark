@@ -462,6 +462,9 @@ def print_summary(summary_file: str):
             selection_scores[model_name] = r2 + bonus
         best_model_name = max(selection_scores, key=selection_scores.get)
         # Return raw R^2 for that best model
+        if valid.get(best_model_name) < 0.5:
+            # If best R^2 is below 0.5, consider it unreliable and return "None"
+            return "Unknown", valid.get(best_model_name)
         return best_model_name, valid.get(best_model_name)
     
     # Build a compact summary: {instance: {best_model, best_r2_score}}

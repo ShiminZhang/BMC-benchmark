@@ -2,85 +2,496 @@
     "1": {
         "solving_time": 0.05,
         "size_of_cnf": 326489,
-        "is_unsat": true,
-        "nvar": 113158
+        "is_unsat": true
     },
     "2": {
-        "solving_time": 0.07,
+        "solving_time": 0.08,
         "size_of_cnf": 488710,
-        "is_unsat": true,
-        "nvar": 167978
+        "is_unsat": true
     },
     "3": {
-        "solving_time": 0.12,
+        "solving_time": 0.13,
         "size_of_cnf": 650931,
-        "is_unsat": true,
-        "nvar": 222798
+        "is_unsat": true
     },
     "4": {
-        "solving_time": 0.17,
+        "solving_time": 0.18,
         "size_of_cnf": 813152,
-        "is_unsat": true,
-        "nvar": 277618
+        "is_unsat": true
     },
     "5": {
         "solving_time": 0.21,
         "size_of_cnf": 975373,
-        "is_unsat": true,
-        "nvar": 332438
+        "is_unsat": true
     },
     "6": {
-        "solving_time": 0.29,
+        "solving_time": 0.3,
         "size_of_cnf": 1137594,
-        "is_unsat": true,
-        "nvar": 387258
+        "is_unsat": true
     },
     "7": {
         "solving_time": 0.35,
         "size_of_cnf": 1299815,
-        "is_unsat": true,
-        "nvar": 442078
+        "is_unsat": true
     },
     "8": {
-        "solving_time": 0.82,
+        "solving_time": 0.76,
         "size_of_cnf": 1462036,
-        "is_unsat": true,
-        "nvar": 496898
+        "is_unsat": true
     },
     "9": {
-        "solving_time": 1.77,
+        "solving_time": 1.62,
         "size_of_cnf": 1624257,
-        "is_unsat": true,
-        "nvar": 551718
+        "is_unsat": true
     },
     "10": {
-        "solving_time": 2.91,
+        "solving_time": 3.64,
         "size_of_cnf": 1786478,
-        "is_unsat": true,
-        "nvar": 606538
+        "is_unsat": true
     },
     "11": {
-        "solving_time": 7.2,
+        "solving_time": 7.5,
         "size_of_cnf": 1948699,
-        "is_unsat": true,
-        "nvar": 661358
+        "is_unsat": true
     },
     "12": {
-        "solving_time": 29.79,
+        "solving_time": 31.18,
         "size_of_cnf": 2110920,
-        "is_unsat": true,
-        "nvar": 716178
+        "is_unsat": true
     },
     "13": {
-        "solving_time": 62.47,
+        "solving_time": 80.3,
         "size_of_cnf": 2273141,
-        "is_unsat": true,
-        "nvar": 770998
+        "is_unsat": true
     },
     "14": {
-        "solving_time": 807.21,
+        "solving_time": 953.43,
         "size_of_cnf": 2435362,
-        "is_unsat": true,
-        "nvar": 825818
+        "is_unsat": true
+    },
+    "15": {
+        "solving_time": 1591.76,
+        "size_of_cnf": 2597583,
+        "is_unsat": false
+    },
+    "16": {
+        "solving_time": 121.03,
+        "size_of_cnf": 2759804,
+        "is_unsat": false
+    },
+    "17": {
+        "solving_time": 242.34,
+        "size_of_cnf": 2922025,
+        "is_unsat": false
+    },
+    "18": {
+        "solving_time": 95.75,
+        "size_of_cnf": 3084246,
+        "is_unsat": false
+    },
+    "19": {
+        "solving_time": 279.34,
+        "size_of_cnf": 3246467,
+        "is_unsat": false
+    },
+    "20": {
+        "solving_time": 241.76,
+        "size_of_cnf": 3408688,
+        "is_unsat": false
+    },
+    "21": {
+        "solving_time": 432.51,
+        "size_of_cnf": 3570909,
+        "is_unsat": false
+    },
+    "22": {
+        "solving_time": 57.97,
+        "size_of_cnf": 3733130,
+        "is_unsat": false
+    },
+    "23": {
+        "solving_time": 55.46,
+        "size_of_cnf": 3895351,
+        "is_unsat": false
+    },
+    "24": {
+        "solving_time": 90.88,
+        "size_of_cnf": 4057572,
+        "is_unsat": false
+    },
+    "25": {
+        "solving_time": 9.97,
+        "size_of_cnf": 4219793,
+        "is_unsat": false
+    },
+    "27": {
+        "solving_time": 98.01,
+        "size_of_cnf": 4544235,
+        "is_unsat": false
+    },
+    "28": {
+        "solving_time": 147.64,
+        "size_of_cnf": 4706456,
+        "is_unsat": false
+    },
+    "29": {
+        "solving_time": 135.89,
+        "size_of_cnf": 4868677,
+        "is_unsat": false
+    },
+    "30": {
+        "solving_time": 61.93,
+        "size_of_cnf": 5030898,
+        "is_unsat": false
+    },
+    "31": {
+        "solving_time": 62.22,
+        "size_of_cnf": 5193119,
+        "is_unsat": false
+    },
+    "32": {
+        "solving_time": 356.69,
+        "size_of_cnf": 5355340,
+        "is_unsat": false
+    },
+    "33": {
+        "solving_time": 225.86,
+        "size_of_cnf": 5517561,
+        "is_unsat": false
+    },
+    "34": {
+        "solving_time": 283.01,
+        "size_of_cnf": 5679782,
+        "is_unsat": false
+    },
+    "35": {
+        "solving_time": 15.3,
+        "size_of_cnf": 5842003,
+        "is_unsat": false
+    },
+    "36": {
+        "solving_time": 236.61,
+        "size_of_cnf": 6004224,
+        "is_unsat": false
+    },
+    "37": {
+        "solving_time": 295.36,
+        "size_of_cnf": 6166445,
+        "is_unsat": false
+    },
+    "38": {
+        "solving_time": 141.82,
+        "size_of_cnf": 6328666,
+        "is_unsat": false
+    },
+    "39": {
+        "solving_time": 83.67,
+        "size_of_cnf": 6490887,
+        "is_unsat": false
+    },
+    "40": {
+        "solving_time": 72.66,
+        "size_of_cnf": 6653108,
+        "is_unsat": false
+    },
+    "41": {
+        "solving_time": 394.68,
+        "size_of_cnf": 6815329,
+        "is_unsat": false
+    },
+    "42": {
+        "solving_time": 306.39,
+        "size_of_cnf": 6977550,
+        "is_unsat": false
+    },
+    "43": {
+        "solving_time": 286.72,
+        "size_of_cnf": 7139771,
+        "is_unsat": false
+    },
+    "44": {
+        "solving_time": 242.81,
+        "size_of_cnf": 7301992,
+        "is_unsat": false
+    },
+    "45": {
+        "solving_time": 172.65,
+        "size_of_cnf": 7464213,
+        "is_unsat": false
+    },
+    "46": {
+        "solving_time": 342.26,
+        "size_of_cnf": 7626434,
+        "is_unsat": false
+    },
+    "47": {
+        "solving_time": 27.01,
+        "size_of_cnf": 7788655,
+        "is_unsat": false
+    },
+    "48": {
+        "solving_time": 244.88,
+        "size_of_cnf": 7950876,
+        "is_unsat": false
+    },
+    "49": {
+        "solving_time": 768.53,
+        "size_of_cnf": 8113097,
+        "is_unsat": false
+    },
+    "50": {
+        "solving_time": 21.86,
+        "size_of_cnf": 8275318,
+        "is_unsat": false
+    },
+    "51": {
+        "solving_time": 277.69,
+        "size_of_cnf": 8437539,
+        "is_unsat": false
+    },
+    "52": {
+        "solving_time": 88.9,
+        "size_of_cnf": 8599760,
+        "is_unsat": false
+    },
+    "53": {
+        "solving_time": 837.16,
+        "size_of_cnf": 8761981,
+        "is_unsat": false
+    },
+    "54": {
+        "solving_time": 222.47,
+        "size_of_cnf": 8924202,
+        "is_unsat": false
+    },
+    "55": {
+        "solving_time": 438.75,
+        "size_of_cnf": 9086423,
+        "is_unsat": false
+    },
+    "56": {
+        "solving_time": 160.16,
+        "size_of_cnf": 9248644,
+        "is_unsat": false
+    },
+    "57": {
+        "solving_time": 126.84,
+        "size_of_cnf": 9410865,
+        "is_unsat": false
+    },
+    "58": {
+        "solving_time": 1345.81,
+        "size_of_cnf": 9573086,
+        "is_unsat": false
+    },
+    "59": {
+        "solving_time": 211.18,
+        "size_of_cnf": 9735307,
+        "is_unsat": false
+    },
+    "60": {
+        "solving_time": 1591.67,
+        "size_of_cnf": 9897528,
+        "is_unsat": false
+    },
+    "61": {
+        "solving_time": 1420.08,
+        "size_of_cnf": 10059749,
+        "is_unsat": false
+    },
+    "62": {
+        "solving_time": 93.76,
+        "size_of_cnf": 10221970,
+        "is_unsat": false
+    },
+    "63": {
+        "solving_time": 1590.87,
+        "size_of_cnf": 10384191,
+        "is_unsat": false
+    },
+    "64": {
+        "solving_time": 84.16,
+        "size_of_cnf": 10546412,
+        "is_unsat": false
+    },
+    "65": {
+        "solving_time": 842.8,
+        "size_of_cnf": 10708633,
+        "is_unsat": false
+    },
+    "66": {
+        "solving_time": 490.4,
+        "size_of_cnf": 10870854,
+        "is_unsat": false
+    },
+    "67": {
+        "solving_time": 554.07,
+        "size_of_cnf": 11033075,
+        "is_unsat": false
+    },
+    "68": {
+        "solving_time": 844.72,
+        "size_of_cnf": 11195296,
+        "is_unsat": false
+    },
+    "69": {
+        "solving_time": 463.2,
+        "size_of_cnf": 11357517,
+        "is_unsat": false
+    },
+    "70": {
+        "solving_time": 306.36,
+        "size_of_cnf": 11519738,
+        "is_unsat": false
+    },
+    "71": {
+        "solving_time": 77.69,
+        "size_of_cnf": 11681959,
+        "is_unsat": false
+    },
+    "72": {
+        "solving_time": 1192.79,
+        "size_of_cnf": 11844180,
+        "is_unsat": false
+    },
+    "73": {
+        "solving_time": 224.49,
+        "size_of_cnf": 12006401,
+        "is_unsat": false
+    },
+    "74": {
+        "solving_time": 1589.56,
+        "size_of_cnf": 12168622,
+        "is_unsat": false
+    },
+    "75": {
+        "solving_time": 1590.3,
+        "size_of_cnf": 12330843,
+        "is_unsat": false
+    },
+    "76": {
+        "solving_time": 86.15,
+        "size_of_cnf": 12493064,
+        "is_unsat": false
+    },
+    "77": {
+        "solving_time": 1590.88,
+        "size_of_cnf": 12655285,
+        "is_unsat": false
+    },
+    "78": {
+        "solving_time": 1482.5,
+        "size_of_cnf": 12817506,
+        "is_unsat": false
+    },
+    "79": {
+        "solving_time": 209.21,
+        "size_of_cnf": 12979727,
+        "is_unsat": false
+    },
+    "80": {
+        "solving_time": 1326.51,
+        "size_of_cnf": 13141948,
+        "is_unsat": false
+    },
+    "81": {
+        "solving_time": 1466.33,
+        "size_of_cnf": 13304169,
+        "is_unsat": false
+    },
+    "82": {
+        "solving_time": 955.1,
+        "size_of_cnf": 13466390,
+        "is_unsat": false
+    },
+    "83": {
+        "solving_time": 1029.88,
+        "size_of_cnf": 13628611,
+        "is_unsat": false
+    },
+    "84": {
+        "solving_time": 202.82,
+        "size_of_cnf": 13790832,
+        "is_unsat": false
+    },
+    "85": {
+        "solving_time": 858.32,
+        "size_of_cnf": 13953053,
+        "is_unsat": false
+    },
+    "86": {
+        "solving_time": 851.87,
+        "size_of_cnf": 14115274,
+        "is_unsat": false
+    },
+    "87": {
+        "solving_time": 151.19,
+        "size_of_cnf": 14277495,
+        "is_unsat": false
+    },
+    "88": {
+        "solving_time": 1591.06,
+        "size_of_cnf": 14439716,
+        "is_unsat": false
+    },
+    "89": {
+        "solving_time": 1591.87,
+        "size_of_cnf": 14601937,
+        "is_unsat": false
+    },
+    "90": {
+        "solving_time": 1567.72,
+        "size_of_cnf": 14764158,
+        "is_unsat": false
+    },
+    "91": {
+        "solving_time": 1591.44,
+        "size_of_cnf": 14926379,
+        "is_unsat": false
+    },
+    "92": {
+        "solving_time": 1592.08,
+        "size_of_cnf": 15088600,
+        "is_unsat": false
+    },
+    "93": {
+        "solving_time": 1591.68,
+        "size_of_cnf": 15250821,
+        "is_unsat": false
+    },
+    "94": {
+        "solving_time": 881.82,
+        "size_of_cnf": 15413042,
+        "is_unsat": false
+    },
+    "95": {
+        "solving_time": 756.19,
+        "size_of_cnf": 15575263,
+        "is_unsat": false
+    },
+    "96": {
+        "solving_time": 70.91,
+        "size_of_cnf": 15737484,
+        "is_unsat": false
+    },
+    "97": {
+        "solving_time": 797.41,
+        "size_of_cnf": 15899705,
+        "is_unsat": false
+    },
+    "98": {
+        "solving_time": 253.2,
+        "size_of_cnf": 16061926,
+        "is_unsat": false
+    },
+    "99": {
+        "solving_time": 87.22,
+        "size_of_cnf": 16224147,
+        "is_unsat": false
+    },
+    "100": {
+        "solving_time": 115.79,
+        "size_of_cnf": 16386368,
+        "is_unsat": false
     }
 }
