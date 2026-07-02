@@ -1,3 +1,6 @@
+DEPRECIATED
+THIS README IS NO LONGER MAINTAINED INDEPENDENTLY, PLEASE REFER TO proofdoortools.git FOR DOCUMENTATION
+________________________________________________
 BMC categorization pipeline
 
 ## Purpose
