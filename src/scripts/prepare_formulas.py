@@ -12,12 +12,12 @@ def run_formula(name, K, solver, limit):
     cnf_path = get_cnf_path(name, K)
     solving_log_path = get_solving_log_path(name, K)
     LOG(f"Running formula {name} with K={K} up to limit {limit}")
-    if os.path.exists(solving_log_path): # TODO check if the log is valid
+    if os.path.exists(solving_log_path) and False: # always rerun now
         return True
     try:
         # Run the solver command with timeout
         result = subprocess.run(
-            f"{solver} {cnf_path} --plain --no-reduce -t {limit}",
+            f"{solver} {cnf_path} --plain -t {limit}",
             shell=True,
             capture_output=True,
             text=True,
