@@ -17,7 +17,7 @@ def run_formula(name, K, solver, limit):
     try:
         # Run the solver command with timeout
         result = subprocess.run(
-            f"{solver} {cnf_path} --plain --no-reduce -t {limit}",
+            f"{solver} {cnf_path} --plain -t {limit}",
             shell=True,
             capture_output=True,
             text=True,

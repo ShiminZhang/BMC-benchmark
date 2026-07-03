@@ -131,7 +131,7 @@ def main():
             )
     elif args.all_slurm:
         solving_log_dir = get_solving_log_dir()
-        activate_python = "source .env; source $PYENVPATH"
+        activate_python = "source ./.env; source $PYENVPATH"
         for formula_dir in os.listdir(solving_log_dir):
             n_flag = " --n" if args.n else ""
             restore_flag = " --restore_cnf" if args.restore_cnf else ""

@@ -4,7 +4,7 @@ def get_cnf_dir(K):
     if os.path.exists(f"./data/cnfs/"):
         return f"./data/cnfs/"
     else:
-        os.makedirs(f"./data/cnfs/")
+        os.makedirs(f"./data/cnfs/", exist_ok=True)
         return f"./data/cnfs/"
 
 def get_cnf_per_instance_dir(name, K = None):
