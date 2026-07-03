@@ -1,8 +1,10 @@
 from paths import get_solving_times_path, get_solving_log_dir, get_cnf_path, get_cnf_per_instance_dir, get_aig_dir
 import os
 import json
+import random
 import argparse
 from GenericRA import LOG, TOGGLE_SHOWLOG, GetDataFromLog
+from scramble_utils import SCRAMBLE_TYPES, make_scrambled_name, parse_scrambled_name, scramble_cnf_file
 from tqdm import tqdm
 
 # this function is supposed to collect the solving time of a formula with all Ks
@@ -24,11 +26,41 @@ def get_nvar_from_cnf(cnf_path):
                     return int(parts[2])
     return None
 
+def restore_scrambled_cnf_series(orig_name, scramble_type, seed, restore_cnf):
+    # The scramble RNG stream in prepare_formulas.prepare_scrambled_for_name is seeded
+    # once per (orig_name, scramble_type) and consumed sequentially across all Ks in
+    # sorted order, so a single missing K cannot be rebuilt in isolation - the whole
+    # series must be replayed from the same seed in the same K order to stay consistent.
+    solving_time_path = get_solving_times_path(orig_name)
+    if not os.path.exists(solving_time_path):
+        LOG(f"solving time json not found for {orig_name}: {solving_time_path}, cannot rebuild scrambled series")
+        return False
+    with open(solving_time_path, "r") as f:
+        data = json.load(f)
+    ks = sorted(int(k) for k in data.keys())
+    scrambled_name = make_scrambled_name(orig_name, scramble_type, seed)
+    rng = random.Random(seed)
+    for k in ks:
+        orig_cnf_path = get_cnf_path(orig_name, k)
+        if not restore_cnf_if_needed(orig_name, k, orig_cnf_path, restore_cnf):
+            LOG(f"Could not restore original CNF {orig_cnf_path} for K={k}")
+            return False
+        scrambled_cnf_path = get_cnf_path(scrambled_name, k)
+        scramble_cnf_file(orig_cnf_path, scrambled_cnf_path, scramble_type, rng)
+    return True
+
 def restore_cnf_if_needed(name, k, cnf_path, restore_cnf):
     if os.path.exists(cnf_path):
         return True
     if not restore_cnf:
         return False
+    scrambled = parse_scrambled_name(name)
+    if scrambled is not None:
+        orig_name, scramble_type, seed = scrambled
+        LOG(f"Restoring scrambled CNF series for {name} (type={scramble_type}, seed={seed})")
+        if not restore_scrambled_cnf_series(orig_name, scramble_type, seed, restore_cnf):
+            return False
+        return os.path.exists(cnf_path)
     LOG(f"Restoring CNF for {name} with K={k}")
     cnf_per_instance_dir = get_cnf_per_instance_dir(name)
     aig_dir = get_aig_dir()
@@ -119,8 +151,16 @@ def main():
     parser.add_argument("--all_slurm", action="store_true", default=False)
     parser.add_argument("--n", action="store_true", default=False)
     parser.add_argument("--restore_cnf", action="store_true", default=False)
+    parser.add_argument("--name", type=str, required=False, help="original instance name, use with --scramble/--seed instead of --formula_dir")
+    parser.add_argument("--scramble", type=str, choices=SCRAMBLE_TYPES, required=False, help="scramble type; combine with --name and --seed to target a scrambled variant")
+    parser.add_argument("--seed", type=int, required=False)
 
     args = parser.parse_args()
+    if args.name and args.scramble:
+        assert args.seed is not None, "--seed is required when --name/--scramble are used"
+        scrambled_name = make_scrambled_name(args.name, args.scramble, args.seed)
+        args.formula_dir = os.path.join(get_solving_log_dir(), scrambled_name)
+
     if args.all:
         solving_log_dir = get_solving_log_dir()
         for formula_dir in tqdm(os.listdir(solving_log_dir)):
