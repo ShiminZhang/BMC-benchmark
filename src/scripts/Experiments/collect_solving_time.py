@@ -193,6 +193,8 @@ def main():
     elif args.all:
         solving_log_dir = get_solving_log_dir()
         for formula_dir in tqdm(os.listdir(solving_log_dir)):
+            if parse_scrambled_name(formula_dir) is not None:
+                continue  # plain --all only touches original formulas; pass --scramble to target scrambled variants
             collect_solving_time(
                 os.path.join(solving_log_dir, formula_dir),
                 include_nvar=args.n,
@@ -214,6 +216,8 @@ def main():
                 os.system(f"sbatch --job-name=collect_solving_time_{scrambled_name} --output={os.path.join(formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
         else:
             for formula_dir in os.listdir(solving_log_dir):
+                if parse_scrambled_name(formula_dir) is not None:
+                    continue  # plain --all_slurm only touches original formulas; pass --scramble to target scrambled variants
                 n_flag = " --n" if args.n else ""
                 restore_flag = " --restore_cnf" if args.restore_cnf else ""
                 wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {os.path.join(solving_log_dir, formula_dir)}{n_flag}{restore_flag}"
