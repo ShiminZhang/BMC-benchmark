@@ -6,6 +6,7 @@ import argparse
 from GenericRA import LOG, TOGGLE_SHOWLOG, GetDataFromLog
 from scramble_utils import SCRAMBLE_TYPES, make_scrambled_name, parse_scrambled_name, scramble_cnf_file
 from tqdm import tqdm
+from utils.utils import get_python_activation_command
 
 # this function is supposed to collect the solving time of a formula with all Ks
 # formula_dir: the directory of the formula
@@ -199,7 +200,7 @@ def main():
             )
     elif args.all_slurm:
         solving_log_dir = get_solving_log_dir()
-        activate_python = "source ./.env; source $PYENVPATH"
+        activate_python = get_python_activation_command()
         if args.scramble:
             assert args.seed is not None, "--seed is required when --all_slurm/--scramble are used"
             n_flag = " --n" if args.n else ""

@@ -2,6 +2,9 @@ import os
 
 DEBUG = False
 
+def get_python_activation_command():
+    return "source ./.env; source $PYENVPATH_BMC"
+
 def run_slurm_job_wrap(cmd, output, job_name,wait_id=None,mem="16g", time="20:00:00"):
     # if DEBUG:
     #     print(f"Running command: {cmd}")
