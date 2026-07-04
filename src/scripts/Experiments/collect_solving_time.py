@@ -1,4 +1,4 @@
-from paths import get_solving_times_path, get_solving_log_dir, get_cnf_path, get_cnf_per_instance_dir, get_aig_dir
+from paths import get_solving_times_path, get_solving_times_dir, get_solving_log_dir, get_cnf_path, get_cnf_per_instance_dir, get_aig_dir
 import os
 import json
 import random
@@ -68,6 +68,16 @@ def restore_cnf_if_needed(name, k, cnf_path, restore_cnf):
     os.system(f"./libs/bin/simplecar -bmc -k {k} -cnf {cnf_per_instance_dir} {aig_path}")
     return os.path.exists(cnf_path)
 
+def get_original_names_with_solving_times():
+    names = []
+    for f in os.listdir(get_solving_times_dir()):
+        if not f.endswith(".json"):
+            continue
+        name = f[:-len(".json")]
+        if parse_scrambled_name(name) is None:
+            names.append(name)
+    return sorted(names)
+
 def collect_solving_time(formula_dir, time_limit=0, k_limit=0, include_nvar=False, restore_cnf=False):
     # parse basename from formula_dir
     chunks = formula_dir.split("/")
@@ -76,7 +86,10 @@ def collect_solving_time(formula_dir, time_limit=0, k_limit=0, include_nvar=Fals
     if not basename:
         LOG(f"basename is empty, skipping {formula_dir}")
         return None
-        
+    if not os.path.isdir(formula_dir):
+        LOG(f"formula_dir {formula_dir} does not exist, skipping (no runs collected for this formula yet?)")
+        return None
+
     # list all files in formula_dir that end with .log
     log_files = [f for f in os.listdir(formula_dir) if f.endswith(".log")]
     output_path = get_solving_times_path(basename)
@@ -161,7 +174,22 @@ def main():
         scrambled_name = make_scrambled_name(args.name, args.scramble, args.seed)
         args.formula_dir = os.path.join(get_solving_log_dir(), scrambled_name)
 
-    if args.all:
+    if args.all and args.scramble:
+        # bulk-collect one scramble type/seed across every original instance that has
+        # solving_times data, mirroring prepare_formulas.py's `--manage --scramble`
+        assert args.seed is not None, "--seed is required when --all/--scramble are used"
+        solving_log_dir = get_solving_log_dir()
+        for name in tqdm(get_original_names_with_solving_times()):
+            scrambled_name = make_scrambled_name(name, args.scramble, args.seed)
+            formula_dir = os.path.join(solving_log_dir, scrambled_name)
+            if not os.path.isdir(formula_dir):
+                continue
+            collect_solving_time(
+                formula_dir,
+                include_nvar=args.n,
+                restore_cnf=args.restore_cnf,
+            )
+    elif args.all:
         solving_log_dir = get_solving_log_dir()
         for formula_dir in tqdm(os.listdir(solving_log_dir)):
             collect_solving_time(
@@ -172,11 +200,23 @@ def main():
     elif args.all_slurm:
         solving_log_dir = get_solving_log_dir()
         activate_python = "source ./.env; source $PYENVPATH"
-        for formula_dir in os.listdir(solving_log_dir):
+        if args.scramble:
+            assert args.seed is not None, "--seed is required when --all_slurm/--scramble are used"
             n_flag = " --n" if args.n else ""
             restore_flag = " --restore_cnf" if args.restore_cnf else ""
-            wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {os.path.join(solving_log_dir, formula_dir)}{n_flag}{restore_flag}"
-            os.system(f"sbatch --job-name=collect_solving_time_{formula_dir} --output={os.path.join(solving_log_dir, formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
+            for name in get_original_names_with_solving_times():
+                scrambled_name = make_scrambled_name(name, args.scramble, args.seed)
+                formula_dir = os.path.join(solving_log_dir, scrambled_name)
+                if not os.path.isdir(formula_dir):
+                    continue
+                wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {formula_dir}{n_flag}{restore_flag}"
+                os.system(f"sbatch --job-name=collect_solving_time_{scrambled_name} --output={os.path.join(formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
+        else:
+            for formula_dir in os.listdir(solving_log_dir):
+                n_flag = " --n" if args.n else ""
+                restore_flag = " --restore_cnf" if args.restore_cnf else ""
+                wrap = f"{activate_python} && python -m src.scripts.Experiments.collect_solving_time --formula_dir {os.path.join(solving_log_dir, formula_dir)}{n_flag}{restore_flag}"
+                os.system(f"sbatch --job-name=collect_solving_time_{formula_dir} --output={os.path.join(solving_log_dir, formula_dir, 'collect_solving_time.log')} --mem=16g --time=4:00:00 --wrap=\"{wrap}\"")
     else:
         collect_solving_time(
             args.formula_dir,

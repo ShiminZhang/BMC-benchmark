@@ -25,6 +25,12 @@ def get_solving_log_dir():
     return dir
 
 def get_prepare_formulas_log(name):
+    from scramble_utils import parse_scrambled_name
+    scrambled = parse_scrambled_name(name)
+    if scrambled is not None:
+        orig_name, _, seed = scrambled
+        # matches the --output path built in prepare_formulas.py's `--manage --scramble` dispatch
+        return f"./logs/prepare_formulas/{orig_name}_scramble_{seed}.log"
     return f"./logs/prepare_formulas/{name}_500.log"
 
 def get_solving_log_path(name, K):
@@ -133,3 +139,17 @@ def get_results_dir():
     if not os.path.exists(dir):
         os.makedirs(dir)
     return dir
+
+def get_scramble_dr_analysis_dir():
+    dir = f"./results/scramble_dr_analysis/"
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    return dir
+
+def get_scramble_dr_analysis_path(seed):
+    dir = get_scramble_dr_analysis_dir()
+    return f"{dir}/scramble_dr_seed{seed}.json"
+
+def get_scramble_dr_summary_path(seed):
+    dir = get_scramble_dr_analysis_dir()
+    return f"{dir}/scramble_dr_seed{seed}_summary.json"
