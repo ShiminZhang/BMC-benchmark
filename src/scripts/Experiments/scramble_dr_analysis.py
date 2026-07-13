@@ -65,14 +65,23 @@ def analyze_name_with_scrambles(name: str, seed: int, save_plot: bool) -> Dict[s
     return entry
 
 
+MODEL_FAMILIES = ["linear", "polynomial", "exponential"]
+
+
 def summarize(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
     summary: Dict[str, Any] = {}
     for scramble_type in SCRAMBLE_TYPES:
         transitions: Dict[str, int] = {}
+        # per-pair breakdown among the three known families; anything
+        # involving "unknown"/"error" is only tracked in `transitions`.
+        pair_counts = {
+            f"{a}->{b}": 0 for a in MODEL_FAMILIES for b in MODEL_FAMILIES
+        }
         unchanged = 0
         linear_to_nonlinear = 0
         nonlinear_to_linear = 0
         compared = 0
+        instances_by_pair: Dict[str, List[str]] = {}
         for entry in entries:
             scrambled = entry.get(scramble_type)
             if scrambled is None:
@@ -84,6 +93,9 @@ def summarize(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
             compared += 1
             key = f"{orig_family}->{scr_family}"
             transitions[key] = transitions.get(key, 0) + 1
+            instances_by_pair.setdefault(key, []).append(entry["instance_name"])
+            if orig_family in MODEL_FAMILIES and scr_family in MODEL_FAMILIES:
+                pair_counts[key] += 1
             if orig_family == scr_family:
                 unchanged += 1
             elif orig_family == "linear" and scr_family != "linear":
@@ -95,15 +107,33 @@ def summarize(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
             "unchanged": unchanged,
             "linear_to_nonlinear": linear_to_nonlinear,
             "nonlinear_to_linear": nonlinear_to_linear,
+            "linear_to_linear": pair_counts["linear->linear"],
+            "linear_to_polynomial": pair_counts["linear->polynomial"],
+            "linear_to_exponential": pair_counts["linear->exponential"],
+            "polynomial_to_linear": pair_counts["polynomial->linear"],
+            "polynomial_to_polynomial": pair_counts["polynomial->polynomial"],
+            "polynomial_to_exponential": pair_counts["polynomial->exponential"],
+            "exponential_to_linear": pair_counts["exponential->linear"],
+            "exponential_to_polynomial": pair_counts["exponential->polynomial"],
+            "exponential_to_exponential": pair_counts["exponential->exponential"],
             "transitions": transitions,
+            "instances_by_pair": instances_by_pair,
         }
     return summary
 
 
 def write_summary_csv(summary: Dict[str, Any], csv_path: str) -> None:
+    detail_cols = [
+        "linear_to_linear", "linear_to_polynomial", "linear_to_exponential",
+        "polynomial_to_linear", "polynomial_to_polynomial", "polynomial_to_exponential",
+        "exponential_to_linear", "exponential_to_polynomial", "exponential_to_exponential",
+    ]
     with open(csv_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["scramble_type", "compared", "unchanged", "linear_to_nonlinear", "nonlinear_to_linear"])
+        writer.writerow(
+            ["scramble_type", "compared", "unchanged", "linear_to_nonlinear", "nonlinear_to_linear"]
+            + detail_cols
+        )
         for scramble_type, info in summary.items():
             writer.writerow([
                 scramble_type,
@@ -111,7 +141,7 @@ def write_summary_csv(summary: Dict[str, Any], csv_path: str) -> None:
                 info["unchanged"],
                 info["linear_to_nonlinear"],
                 info["nonlinear_to_linear"],
-            ])
+            ] + [info[col] for col in detail_cols])
 
 
 def main():
